@@ -61,7 +61,7 @@ export default async function HomePage() {
           className="pointer-events-none absolute inset-0 [background-image:linear-gradient(var(--border)_1px,transparent_1px),linear-gradient(90deg,var(--border)_1px,transparent_1px)] [background-size:64px_64px] opacity-[0.15]"
         />
         <div className="canvas-frame relative mx-3 my-6 sm:mx-6 sm:my-10 lg:mx-8">
-          <div className="grid lg:grid-cols-[1.3fr_0.7fr]">
+          <div className="grid lg:grid-cols-[1.3fr_0.7fr] items-stretch">
             <div className="corner-brackets p-6 py-16 sm:p-10 sm:py-24 lg:border-r lg:border-border">
               <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
                 <Terminal className="size-3.5 text-primary" />
@@ -107,8 +107,8 @@ export default async function HomePage() {
             </div>
 
             <div className="flex flex-col justify-between gap-8 border-t border-border p-6 sm:p-10 lg:border-t-0">
-              <div className="flex flex-1 items-center justify-center border border-dashed border-border p-10">
-                <LogoMark className="h-20 w-20 sm:h-28 sm:w-28" />
+              <div className="flex flex-1 items-center justify-center border border-dashed border-border p-0">
+                <LogoMark className="h-full w-full" />
               </div>
               <SystemStatusCard
                 lines={[

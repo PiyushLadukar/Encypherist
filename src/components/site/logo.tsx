@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
@@ -7,31 +8,16 @@ import { cn } from "@/lib/utils";
  */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      aria-hidden="true"
-      className={cn("shrink-0", className)}
-    >
-      <rect x="1" y="1" width="30" height="30" rx="7" className="fill-card stroke-border" />
-      <path
-        d="M11 10 L6 16 L11 22"
-        stroke="var(--primary)"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
+    <div className={cn("relative overflow-hidden rounded-md", className)}>
+      <Image
+        src="/logo.png"
+        alt="Encypherist logo"
+        fill
+        sizes="(min-width: 640px) 320px, 240px"
+        className="object-contain"
+        priority
       />
-      <path
-        d="M21 10 L26 16 L21 22"
-        stroke="var(--primary)"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <circle cx="16" cy="16" r="1.6" className="fill-primary" />
-    </svg>
+    </div>
   );
 }
 
