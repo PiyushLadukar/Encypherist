@@ -38,6 +38,7 @@ export default async function HomePage() {
   const featured = upcoming[0] ?? announced[0] ?? null;
   const featuredIndex = featured ? events.findIndex((e) => e.id === featured.id) : -1;
   const currentTenureMemberCount = members.length;
+  const facultyMembers = members.filter((m) => m.team_group === "faculty").sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
   const recentPast = past.slice(0, 3);
   const coreTeam = members.filter((m) => m.is_core).slice(0, 8);
   const galleryPreview = gallery.slice(0, 6);

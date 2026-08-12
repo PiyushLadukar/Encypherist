@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/site/section-heading";
 import { Reveal } from "@/components/site/reveal";
 import { getPublishedMembers } from "@/lib/data/members";
+import { getPublishedEvents } from "@/lib/data/events";
+import { PRINCIPLES } from "@/lib/principles";
+import { formatDate } from "@/lib/format";
 import { ORG } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -17,6 +20,7 @@ export const dynamic = "force-dynamic";
 
 export default async function AboutPage() {
   const members = await getPublishedMembers().catch(() => []);
+  const timeline = await getPublishedEvents().catch(() => []);
 
   const currentTenureCount = members.length;
 
