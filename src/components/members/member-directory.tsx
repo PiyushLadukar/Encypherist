@@ -14,7 +14,6 @@ const FILTERS: { value: TeamGroup | "all" | "core"; label: string }[] = [
   { value: "final", label: "Final Year" },
   { value: "third", label: "Third Year" },
   { value: "second", label: "Second Year" },
-  { value: "history", label: "Forum History" },
 ];
 
 export function MemberDirectory({ members }: { members: Member[] }) {
@@ -53,7 +52,7 @@ export function MemberDirectory({ members }: { members: Member[] }) {
     return map;
   }, [filtered]);
 
-  const groupOrder: TeamGroup[] = ["final", "third", "second", "history"];
+  const groupOrder: TeamGroup[] = ["final", "third", "second"];
 
   return (
     <div>

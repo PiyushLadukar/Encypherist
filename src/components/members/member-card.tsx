@@ -44,6 +44,7 @@ export function MemberCard({ member, className }: { member: Member; className?: 
             <img
               src={member.photo_url}
               alt={member.name}
+              style={{ objectPosition: member.photo_position ?? "center 20%" }}
               className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (

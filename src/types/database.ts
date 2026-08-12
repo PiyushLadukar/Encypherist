@@ -12,7 +12,7 @@
  */
 
 export type Confidence = "verified" | "likely" | "unverified";
-export type TeamGroup = "final" | "third" | "second" | "history";
+export type TeamGroup = "final" | "third" | "second";
 export type EventType =
   | "hackathon"
   | "workshop"
@@ -53,6 +53,7 @@ export type MemberRow = {
   bio: string | null;
   skills: string[];
   photo_url: string | null;
+  photo_position?: string | null;
   socials: MemberSocials;
   is_core: boolean;
   sort_order: number;

@@ -33,7 +33,7 @@ import type {
 
 const now = new Date().toISOString();
 
-type OptionalMemberKey = "bio" | "photo_url" | "socials" | "skills" | "published";
+type OptionalMemberKey = "bio" | "photo_url" | "photo_position" | "socials" | "skills" | "published";
 type SeedMember = Omit<Member, "id" | "created_at" | "updated_at" | OptionalMemberKey> &
   Partial<Pick<Member, OptionalMemberKey>>;
 
@@ -56,6 +56,7 @@ function initMembers(): Member[] {
     id: randomUUID(),
     bio: m.bio ?? null,
     photo_url: m.photo_url ?? null,
+    photo_position: m.photo_position ?? null,
     socials: m.socials ?? {},
     skills: m.skills ?? [],
     published: m.published ?? true,
