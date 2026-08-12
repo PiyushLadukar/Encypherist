@@ -38,7 +38,7 @@ export default async function AboutPage() {
     .filter((e) => e.start_at && e.confidence === "verified")
     .sort((a, b) => new Date(a.start_at!).getTime() - new Date(b.start_at!).getTime());
 
-  const currentTenureCount = members.filter((m) => m.team_group !== "history").length;
+  const currentTenureCount = members.length;
 
   return (
     <div>

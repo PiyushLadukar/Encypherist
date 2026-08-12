@@ -44,7 +44,14 @@ export function EventDetailView({
       <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
         <div>
           <div className="relative aspect-[4/3] overflow-hidden border border-border">
-            <PosterPlaceholder title={event.title} />
+            {event.poster_url ? (
+              <div className="relative h-full w-full overflow-hidden">
+                <img src={event.poster_url} alt={event.title} className="h-full w-full object-cover" />
+                <div className="pointer-events-none absolute inset-0 border border-black/80" />
+              </div>
+            ) : (
+              <PosterPlaceholder title={event.title} />
+            )}
           </div>
         </div>
 
@@ -189,7 +196,18 @@ export function EventDetailView({
                     key={item.id}
                     className="aspect-square overflow-hidden rounded-md border border-border"
                   >
-                    <PosterPlaceholder title={item.caption ?? event.title} />
+                    {item.image_url ? (
+                      <div className="relative h-full w-full overflow-hidden">
+                        <img
+                          src={item.image_url}
+                          alt={item.caption ?? event.title}
+                          className="h-full w-full object-cover"
+                        />
+                        <div className="pointer-events-none absolute inset-0 border border-black/80" />
+                      </div>
+                    ) : (
+                      <PosterPlaceholder title={item.caption ?? event.title} />
+                    )}
                   </div>
                 ))}
               </div>

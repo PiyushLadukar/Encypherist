@@ -20,7 +20,7 @@ import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { memberSchema, type MemberInput } from "@/lib/validation/member";
 import type { Member } from "@/types/database";
 
-const TEAM_GROUPS = ["final", "third", "second", "history"] as const;
+const TEAM_GROUPS = ["final", "third", "second"] as const;
 const CONFIDENCE = ["verified", "likely", "unverified"] as const;
 
 function toDefaults(member?: Member | null): MemberInput {

@@ -41,9 +41,9 @@ export default async function HomePage() {
   const { upcoming, past, announced } = splitUpcomingPast(events);
   const featured = upcoming[0] ?? announced[0] ?? null;
   const featuredIndex = featured ? events.findIndex((e) => e.id === featured.id) : -1;
-  const currentTenureMemberCount = members.filter((m) => m.team_group !== "history").length;
+  const currentTenureMemberCount = members.length;
   const recentPast = past.slice(0, 3);
-  const coreTeam = members.filter((m) => m.is_core && m.team_group !== "history").slice(0, 8);
+  const coreTeam = members.filter((m) => m.is_core).slice(0, 8);
   const galleryPreview = gallery.slice(0, 6);
   const featuredProjects = projects.slice(0, 2);
   const instagram = socialLinks.find((l) => l.platform === "instagram");

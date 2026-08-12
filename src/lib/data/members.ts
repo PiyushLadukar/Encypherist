@@ -2,7 +2,7 @@ import "server-only";
 import { store } from "@/lib/store";
 import type { Member, TeamGroup } from "@/types/database";
 
-const TEAM_ORDER: TeamGroup[] = ["final", "third", "second", "history"];
+const TEAM_ORDER: TeamGroup[] = ["final", "third", "second"];
 
 export async function getMembers(): Promise<Member[]> {
   return [...store.members].sort((a, b) => a.sort_order - b.sort_order);
@@ -14,7 +14,7 @@ export async function getPublishedMembers(): Promise<Member[]> {
 
 export async function getMembersGrouped(): Promise<Record<TeamGroup, Member[]>> {
   const members = await getPublishedMembers();
-  const grouped: Record<TeamGroup, Member[]> = { final: [], third: [], second: [], history: [] };
+  const grouped: Record<TeamGroup, Member[]> = { final: [], third: [], second: [] };
   for (const member of members) {
     grouped[member.team_group].push(member);
   }

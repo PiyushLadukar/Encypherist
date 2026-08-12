@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { EventCard } from "@/components/events/event-card";
 import { EventTimeline } from "@/components/events/event-timeline";
 import { eventTypeLabel } from "@/lib/format";
@@ -9,7 +10,7 @@ import type { Event, EventType } from "@/types/database";
 
 type Tab = "upcoming" | "past" | "announced";
 
-export function EventDirectory({
+function EventDirectoryContent({
   upcoming,
   past,
   announced,
@@ -18,9 +19,21 @@ export function EventDirectory({
   past: Event[];
   announced: Event[];
 }) {
-  const initialTab: Tab = upcoming.length > 0 ? "upcoming" : announced.length > 0 ? "announced" : "past";
+  const searchParams = useSearchParams();
+  const paramTab = searchParams.get("tab") as Tab | null;
+
+  const initialTab: Tab = (paramTab && ["upcoming", "past", "announced"].includes(paramTab))
+    ? paramTab
+    : upcoming.length > 0 ? "upcoming" : announced.length > 0 ? "announced" : "past";
+
   const [tab, setTab] = useState<Tab>(initialTab);
   const [typeFilter, setTypeFilter] = useState<EventType | "all">("all");
+
+  useEffect(() => {
+    if (paramTab && ["upcoming", "past", "announced"].includes(paramTab)) {
+      setTab(paramTab);
+    }
+  }, [paramTab]);
 
   const allTabs: { value: Tab; label: string; count: number }[] = [
     { value: "upcoming", label: "Upcoming", count: upcoming.length },
@@ -110,5 +123,17 @@ export function EventDirectory({
         </div>
       )}
     </div>
+  );
+}
+
+export function EventDirectory(props: {
+  upcoming: Event[];
+  past: Event[];
+  announced: Event[];
+}) {
+  return (
+    <Suspense fallback={null}>
+      <EventDirectoryContent {...props} />
+    </Suspense>
   );
 }

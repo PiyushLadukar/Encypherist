@@ -54,7 +54,6 @@ const teamGroupLabels: Record<string, string> = {
   final: "Final Year",
   third: "Third Year",
   second: "Second Year",
-  history: "Forum History",
 };
 
 export function teamGroupLabel(group: string): string {
