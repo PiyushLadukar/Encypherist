@@ -1,4 +1,7 @@
 [
+  { "slug": "principal-jit", "name": "Principal, JIT", "designation": "Principal", "team_group": "faculty", "year_session": "2026-27", "is_core": false, "sort_order": 0, "confidence": "verified" },
+  { "slug": "yuvraj-gholap", "name": "Mr. Yuvraj Gholap", "designation": "Head of Department", "team_group": "faculty", "year_session": "2026-27", "is_core": false, "sort_order": 1, "confidence": "verified" },
+  { "slug": "rupali-bagate", "name": "Dr. Rupali Bagate", "designation": "Forum Incharge", "team_group": "faculty", "year_session": "2026-27", "is_core": false, "sort_order": 2, "confidence": "verified" },
   { "slug": "muskan-mistry", "name": "Muskan Mistry", "designation": "President", "team_group": "final", "year_session": "2026-27", "is_core": true, "sort_order": 1, "confidence": "verified" },
   { "slug": "piyush-ladukar", "name": "Piyush Ladukar", "designation": "Secretary", "team_group": "final", "year_session": "2026-27", "is_core": true, "sort_order": 2, "confidence": "verified" },
   { "slug": "aditya-kanojiya", "name": "Aditya Kanojiya", "designation": "Sponsorship & Financial Advisor", "team_group": "final", "year_session": "2026-27", "is_core": true, "sort_order": 3, "confidence": "verified" },

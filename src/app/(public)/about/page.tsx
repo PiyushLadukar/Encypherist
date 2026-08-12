@@ -123,7 +123,14 @@ export default async function AboutPage() {
       <section className="border-b border-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <Reveal>
-            <SectionHeading eyebrow="// CORE_PRINCIPLES" title="How the system runs." />
+            <div className="max-w-2xl">
+              <div className="w-fit rounded-full border border-border bg-card px-5 py-3 font-heading text-xl font-bold uppercase tracking-[0.26em] text-foreground sm:text-2xl">
+                CORE PRINCIPLES
+              </div>
+              <h2 className="mt-6 text-balance font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                How the system runs.
+              </h2>
+            </div>
           </Reveal>
           <Reveal delay={0.1}>
             <div className="mt-12 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">

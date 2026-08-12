@@ -1,11 +1,13 @@
 import Link from "next/link";
-import { AtSign, ArrowUpRight } from "lucide-react";
+import { AtSign, ArrowUpRight, Share2, Mail } from "lucide-react";
 import { Logo } from "@/components/site/logo";
 import { NAV_LINKS, ORG } from "@/lib/constants";
 import type { SiteSettings, SocialLink } from "@/types/database";
 
 const SOCIAL_ICONS: Record<string, typeof AtSign> = {
   instagram: AtSign,
+  facebook: Share2,
+  linkedin: Share2,
 };
 
 export function Footer({
@@ -51,7 +53,7 @@ export function Footer({
             <h3 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
               Connect
             </h3>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-4 flex gap-3">
               {socialLinks.map((link) => {
                 const Icon = SOCIAL_ICONS[link.platform] ?? ArrowUpRight;
                 return (
@@ -60,24 +62,23 @@ export function Footer({
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-foreground/80 transition-colors hover:text-primary"
+                      className="inline-flex items-center text-foreground/80 transition-colors hover:text-primary"
+                      title={link.platform}
                     >
-                      <Icon className="size-4" />
-                      <span className="capitalize">{link.platform}</span>
+                      <Icon className="size-5" />
                     </a>
                   </li>
                 );
               })}
-              {settings.contact_email && (
-                <li>
-                  <a
-                    href={`mailto:${settings.contact_email}`}
-                    className="text-sm text-foreground/80 transition-colors hover:text-primary"
-                  >
-                    {settings.contact_email}
-                  </a>
-                </li>
-              )}
+              <li>
+                <a
+                  href="mailto:contact@example.com"
+                  className="inline-flex items-center text-foreground/80 transition-colors hover:text-primary"
+                  title="Email"
+                >
+                  <Mail className="size-5" />
+                </a>
+              </li>
             </ul>
           </div>
         </div>
