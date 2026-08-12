@@ -65,10 +65,10 @@ export function MemberDirectory({ members }: { members: Member[] }) {
               type="button"
               onClick={() => setFilter(f.value)}
               className={cn(
-                "rounded-full border px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors",
+                "rounded-md border px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider transition-all duration-300 bg-background",
                 filter === f.value
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:text-foreground"
+                  ? "border-emerald-400 text-emerald-400 shadow-[0_0_12px_-2px_rgba(52,211,153,0.3)] font-semibold"
+                  : "border-border/60 text-muted-foreground hover:border-zinc-700 hover:text-foreground"
               )}
             >
               {f.label}
@@ -100,7 +100,7 @@ export function MemberDirectory({ members }: { members: Member[] }) {
                 <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
                   {teamGroupLabel(group)}
                 </h2>
-                <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-5 grid gap-5 items-start sm:grid-cols-2 lg:grid-cols-3">
                   {grouped.get(group)!.map((member) => (
                     <MemberCard key={member.id} member={member} />
                   ))}

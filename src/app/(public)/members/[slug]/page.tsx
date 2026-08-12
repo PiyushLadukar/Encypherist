@@ -58,8 +58,18 @@ export default async function MemberProfilePage({
       </Link>
 
       <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start">
-        <div className="flex size-28 shrink-0 items-center justify-center border border-border bg-secondary font-heading text-4xl font-semibold text-primary">
-          {initials(member.name)}
+        <div className="group relative size-28 shrink-0 overflow-hidden rounded-2xl border border-border/80 bg-zinc-900 shadow-sm transition-all duration-500 hover:border-emerald-400/80 hover:shadow-[0_0_25px_-5px_rgba(52,211,153,0.45)]">
+          {member.photo_url ? (
+            <img
+              src={member.photo_url}
+              alt={member.name}
+              className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-110"
+            />
+          ) : (
+            <div className="flex size-full items-center justify-center font-heading text-4xl font-semibold text-emerald-400 transition-transform duration-500 ease-out group-hover:scale-110">
+              {initials(member.name)}
+            </div>
+          )}
         </div>
 
         <div className="min-w-0">
