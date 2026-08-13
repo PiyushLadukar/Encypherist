@@ -205,7 +205,7 @@ export default async function AboutPage() {
                 variant="outline"
                 className="font-mono text-sm"
                 nativeButton={false}
-                render={<Link href="/members" />}
+                render={<Link href="/member" />}
               >
                 Members
               </Button>

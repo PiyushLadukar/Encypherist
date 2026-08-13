@@ -38,7 +38,7 @@ export default async function MemberProfilePage({
   return (
     <div className="mx-auto max-w-4xl px-4 py-20 sm:px-6 lg:px-8">
       <Link
-        href="/members"
+        href="/member"
         className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="size-3.5" />

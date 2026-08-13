@@ -101,7 +101,7 @@ export default async function HomePage() {
                   size="lg"
                   className="font-mono text-sm"
                   nativeButton={false}
-                  render={<Link href="/members" />}
+                  render={<Link href="/member" />}
                 >
                   Meet the team
                   <ArrowUpRight className="size-4" />
@@ -182,7 +182,7 @@ export default async function HomePage() {
             <div className="flex flex-wrap items-end justify-between gap-4 px-4 sm:px-6 lg:px-8">
               <SectionHeading title="The people behind the system." />
               <Link
-                href="/members"
+                href="/member"
                 className="inline-flex items-center gap-1 font-mono text-xs text-primary"
               >
                 All members

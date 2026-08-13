@@ -6,10 +6,9 @@ import { motion } from "motion/react";
 import { ConfidenceBadge } from "@/components/site/confidence-badge";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/site/social-icons";
 import { initials, memberDomain, memberStatus } from "@/lib/format";
+import { EASE_PREMIUM } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import type { Member } from "@/types/database";
-
-const EASE_PREMIUM = [0.22, 1, 0.36, 1] as const;
 
 const SOCIAL_ICONS = {
   instagram: InstagramIcon,
@@ -19,7 +18,7 @@ const SOCIAL_ICONS = {
 
 /**
  * Opens a member's social link in a new tab without triggering the card's
- * own click-through to `/members/[slug]` — a plain `<a>` here would nest an
+ * own click-through to `/member/[slug]` — a plain `<a>` here would nest an
  * anchor inside the card's outer `Link` (invalid HTML, unreliable clicks),
  * so this is a button that opens the URL itself and stops the event before
  * it reaches the card. Always rendered, even before a member has a URL on
@@ -67,7 +66,7 @@ export function MemberCard({ member, className }: { member: Member; className?: 
 
   return (
     <Link
-      href={`/members/${member.slug}`}
+      href={`/member/${member.slug}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setHovered(true)}
