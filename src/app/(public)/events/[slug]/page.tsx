@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import { EventDetailView } from "@/components/events/event-detail-view";
+import { ComingSoonEvent } from "@/components/events/coming-soon-event";
 import { getEventBySlug, countRegistrations } from "@/lib/data/events";
 
 export const revalidate = 0;
@@ -46,7 +47,11 @@ export default async function EventDetailPage({
           All events
         </Link>
       </div>
-      <EventDetailView event={event} registeredCount={registeredCount} />
+      {event.start_at ? (
+        <EventDetailView event={event} registeredCount={registeredCount} />
+      ) : (
+        <ComingSoonEvent event={event} />
+      )}
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, MapPin } from "lucide-react";
 import { ConfidenceBadge } from "@/components/site/confidence-badge";
+import { Stagger, StaggerItem } from "@/components/site/reveal";
 import { formatDateRange, eventTypeLabel, eventNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Event } from "@/types/database";
@@ -17,11 +18,15 @@ function statusFor(event: Event): { label: string; className: string } {
 
 export function EventTimeline({ events }: { events: Event[] }) {
   return (
-    <ol className="relative border-l-2 border-border pl-8 sm:pl-10">
+    <Stagger as="ol" className="relative border-l-2 border-border pl-8 sm:pl-10" stagger={0.1}>
       {events.map((event, i) => {
         const status = statusFor(event);
         return (
-          <li key={event.id} className={cn("relative", i !== events.length - 1 && "pb-14")}>
+          <StaggerItem
+            as="li"
+            key={event.id}
+            className={cn("relative", i !== events.length - 1 && "pb-14")}
+          >
             <span
               className={cn(
                 "absolute -left-[41px] top-1.5 size-3 border-2 border-background sm:-left-[49px]",
@@ -78,9 +83,9 @@ export function EventTimeline({ events }: { events: Event[] }) {
                 <ArrowUpRight className="size-3.5" />
               </Link>
             </div>
-          </li>
+          </StaggerItem>
         );
       })}
-    </ol>
+    </Stagger>
   );
 }

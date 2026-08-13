@@ -15,6 +15,7 @@ PDF hosted there, and the forum's public Instagram bio), not invented. See
 [`docs/research.md`](docs/research.md) for the full research trail: what's verified,
 what's "likely" but unconfirmed, and what's flagged as a placeholder.
 
+
 The visual language is an original system reverse-engineered from what makes
 [cidc.dev](https://www.cidc.dev/) read as a premium engineering-org site rather than a
 college club page — bounded canvas framing, a two-accent-color discipline, monospace
@@ -240,7 +241,6 @@ through the admin UI as normal.
 ```bash
 vercel
 ```
-
 Fake-data mode deploys with zero configuration. If you've switched to Supabase, set
 the environment variables from `.env.local` in the Vercel project settings before
 deploying. Note the fake-data mode's known limitation on multi-instance serverless
@@ -260,7 +260,6 @@ Summarized in [`docs/research.md`](docs/research.md); the short version:
 - **Not fabricated, ever** — no invented statistics, attendance numbers, sponsors, or
   event outcomes. Where information wasn't publicly available, the UI says so
   explicitly instead of guessing.
-
 No forum logo, brand colors, or real photography could be found through available
 research tools (text-based fetching only — no image extraction or Instagram
 scraping). The visual identity (dark cipher/terminal theme, original wordmark) was

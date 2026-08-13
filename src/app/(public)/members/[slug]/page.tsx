@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { ArrowLeft, Code2, Briefcase, AtSign } from "lucide-react";
-import { ConfidenceBadge } from "@/components/site/confidence-badge";
+import { ArrowLeft } from "lucide-react";
+import { MemberIdCard } from "@/components/members/member-id-card";
+import { Reveal } from "@/components/site/reveal";
 import { getMemberBySlug } from "@/lib/data/members";
 import { getProjectsByContributorName } from "@/lib/data/projects";
-import { initials, teamGroupLabel, memberDomain, memberStatus } from "@/lib/format";
 
 export const revalidate = 0;
 
@@ -23,13 +23,6 @@ export async function generateMetadata({
   };
 }
 
-const SOCIAL_ICONS = {
-  instagram: AtSign,
-  linkedin: Briefcase,
-  github: Code2,
-  twitter: AtSign,
-} as const;
-
 export default async function MemberProfilePage({
   params,
 }: {
@@ -39,11 +32,6 @@ export default async function MemberProfilePage({
   const member = await getMemberBySlug(slug).catch(() => null);
 
   if (!member) notFound();
-
-  const socialEntries = Object.entries(member.socials ?? {}).filter(([, url]) => Boolean(url)) as [
-    keyof typeof SOCIAL_ICONS,
-    string
-  ][];
 
   const contributedProjects = await getProjectsByContributorName(member.name).catch(() => []);
 
@@ -57,58 +45,11 @@ export default async function MemberProfilePage({
         All members
       </Link>
 
-      <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start">
-        <div className="flex size-28 shrink-0 items-center justify-center border border-border bg-secondary font-heading text-4xl font-semibold text-primary">
-          {initials(member.name)}
-        </div>
+      <Reveal delay={0.05} className="mt-10">
+        <MemberIdCard member={member} />
+      </Reveal>
 
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-3">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
-              {teamGroupLabel(member.team_group)} · {member.year_session}
-            </p>
-            <ConfidenceBadge confidence={member.confidence} />
-          </div>
-          <h1 className="mt-2 text-balance font-heading text-4xl font-semibold tracking-tight text-foreground">
-            {member.name}
-          </h1>
-          <p className="mt-1 text-lg text-muted-foreground">{member.designation}</p>
-
-          <div className="mt-4 flex flex-wrap gap-x-5 gap-y-1 font-mono text-[11px] uppercase tracking-wider text-muted-foreground/70">
-            <span>MEMBER_ID // ENCY-{member.sort_order.toString().padStart(3, "0")}</span>
-            <span>DOMAIN // {memberDomain(member.designation)}</span>
-            <span
-              className={
-                memberStatus(member.team_group) === "ACTIVE" ? "text-primary" : "text-muted-foreground"
-              }
-            >
-              STATUS // {memberStatus(member.team_group)}
-            </span>
-          </div>
-
-          {socialEntries.length > 0 && (
-            <div className="mt-5 flex gap-3">
-              {socialEntries.map(([platform, url]) => {
-                const Icon = SOCIAL_ICONS[platform] ?? AtSign;
-                return (
-                  <a
-                    key={platform}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={platform}
-                    className="flex size-9 items-center justify-center rounded-md border border-border text-muted-foreground transition-colors hover:border-primary/40 hover:text-primary"
-                  >
-                    <Icon className="size-4" />
-                  </a>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-12 grid gap-10 sm:grid-cols-[1fr_auto]">
+      <Reveal delay={0.1} className="mx-auto mt-16 grid max-w-2xl gap-10 sm:grid-cols-[1fr_auto]">
         <div>
           <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
             About
@@ -135,10 +76,10 @@ export default async function MemberProfilePage({
             </div>
           </div>
         )}
-      </div>
+      </Reveal>
 
       {contributedProjects.length > 0 && (
-        <div className="mt-12">
+        <Reveal delay={0.15} className="mx-auto mt-12 max-w-2xl">
           <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
             Projects
           </h2>
@@ -154,7 +95,7 @@ export default async function MemberProfilePage({
               </li>
             ))}
           </ul>
-        </div>
+        </Reveal>
       )}
     </div>
   );

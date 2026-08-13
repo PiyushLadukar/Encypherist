@@ -20,15 +20,23 @@ import { ImageUploadField } from "@/components/admin/image-upload-field";
 import { memberSchema, type MemberInput } from "@/lib/validation/member";
 import type { Member } from "@/types/database";
 
-const TEAM_GROUPS = ["final", "third", "second", "history"] as const;
+const TEAM_GROUPS = ["final", "third", "second"] as const;
 const CONFIDENCE = ["verified", "likely", "unverified"] as const;
+
+// Faculty and history (past-tenure alumni) members aren't manageable through
+// this form — it only ever offers final/third/second as options, matching
+// the validation schema. A faculty/history member's team_group just isn't a
+// valid starting value here.
+function isEditableTeamGroup(group?: string): group is MemberInput["team_group"] {
+  return (TEAM_GROUPS as readonly string[]).includes(group ?? "");
+}
 
 function toDefaults(member?: Member | null): MemberInput {
   return {
     slug: member?.slug ?? "",
     name: member?.name ?? "",
     designation: member?.designation ?? "",
-    team_group: member?.team_group ?? "second",
+    team_group: isEditableTeamGroup(member?.team_group) ? member.team_group : "second",
     year_session: member?.year_session ?? "",
     bio: member?.bio ?? "",
     skills: member?.skills ?? [],
@@ -194,34 +202,13 @@ export function MemberForm({ member }: { member?: Member | null }) {
         onChange={(url) => update("photo_url", url)}
       />
 
+      {/*
+        Social URL fields (Instagram/LinkedIn/GitHub) are intentionally not
+        editable here right now — socials are being filled in later from a
+        bulk sheet rather than one member at a time. `values.socials` still
+        flows through untouched, so nothing on the public cards changes.
+      */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="instagram">Instagram URL</Label>
-          <Input
-            id="instagram"
-            value={values.socials.instagram ?? ""}
-            onChange={(e) => update("socials", { ...values.socials, instagram: e.target.value })}
-            className="mt-1.5"
-          />
-        </div>
-        <div>
-          <Label htmlFor="linkedin">LinkedIn URL</Label>
-          <Input
-            id="linkedin"
-            value={values.socials.linkedin ?? ""}
-            onChange={(e) => update("socials", { ...values.socials, linkedin: e.target.value })}
-            className="mt-1.5"
-          />
-        </div>
-        <div>
-          <Label htmlFor="github">GitHub URL</Label>
-          <Input
-            id="github"
-            value={values.socials.github ?? ""}
-            onChange={(e) => update("socials", { ...values.socials, github: e.target.value })}
-            className="mt-1.5"
-          />
-        </div>
         <div>
           <Label htmlFor="sort_order">Sort order</Label>
           <Input

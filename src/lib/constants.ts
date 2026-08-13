@@ -1,10 +1,9 @@
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
   { href: "/members", label: "Members" },
-  { href: "/projects", label: "Projects" },
   { href: "/events", label: "Events" },
   { href: "/gallery", label: "Gallery" },
+  { href: "/about", label: "About" },
 ] as const;
 
 export const ORG = {

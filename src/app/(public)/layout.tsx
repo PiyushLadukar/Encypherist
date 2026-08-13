@@ -1,6 +1,5 @@
 import { Nav } from "@/components/site/nav";
 import { Footer } from "@/components/site/footer";
-import { BootSequence } from "@/components/site/boot-sequence";
 import { getSiteSettings, getSocialLinks } from "@/lib/data/settings";
 import { getPublishedEvents, splitUpcomingPast } from "@/lib/data/events";
 import type { SiteSettings } from "@/types/database";
@@ -34,7 +33,6 @@ export default async function PublicLayout({
 
   return (
     <>
-      <BootSequence />
       <Nav featuredEvent={featuredEvent} />
       <main className="flex-1">{children}</main>
       <Footer settings={settings} socialLinks={socialLinks} />

@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { AtSign, ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Mail } from "lucide-react";
 import { Logo } from "@/components/site/logo";
+import { FacebookIcon, InstagramIcon, LinkedinIcon } from "@/components/site/social-icons";
 import { NAV_LINKS, ORG } from "@/lib/constants";
 import type { SiteSettings, SocialLink } from "@/types/database";
 
-const SOCIAL_ICONS: Record<string, typeof AtSign> = {
-  instagram: AtSign,
+const SOCIAL_ICONS: Record<string, typeof FacebookIcon> = {
+  instagram: InstagramIcon,
+  facebook: FacebookIcon,
+  linkedin: LinkedinIcon,
 };
 
 export function Footer({
@@ -51,19 +54,19 @@ export function Footer({
             <h3 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
               Connect
             </h3>
-            <ul className="mt-4 space-y-2.5">
+            <ul className="mt-4 flex gap-5">
               {socialLinks.map((link) => {
-                const Icon = SOCIAL_ICONS[link.platform] ?? ArrowUpRight;
+                const Icon = SOCIAL_ICONS[link.platform];
                 return (
                   <li key={link.id}>
                     <a
                       href={link.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-sm text-foreground/80 transition-colors hover:text-primary"
+                      className="inline-flex items-center text-foreground/80 transition-all hover:scale-110 hover:text-primary"
+                      title={link.platform}
                     >
-                      <Icon className="size-4" />
-                      <span className="capitalize">{link.platform}</span>
+                      {Icon ? <Icon className="size-5" /> : <ArrowUpRight className="size-5" />}
                     </a>
                   </li>
                 );
@@ -72,9 +75,10 @@ export function Footer({
                 <li>
                   <a
                     href={`mailto:${settings.contact_email}`}
-                    className="text-sm text-foreground/80 transition-colors hover:text-primary"
+                    className="inline-flex items-center text-foreground/80 transition-all hover:scale-110 hover:text-primary"
+                    title="Email"
                   >
-                    {settings.contact_email}
+                    <Mail className="size-5" />
                   </a>
                 </li>
               )}

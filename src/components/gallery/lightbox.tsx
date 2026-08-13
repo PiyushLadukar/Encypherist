@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
 import { X, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import { PosterPlaceholder } from "@/components/events/event-card";
 import type { GalleryEntry } from "@/lib/data/gallery";
@@ -18,6 +19,7 @@ export function Lightbox({
   onNavigate: (index: number) => void;
 }) {
   const current = items[index];
+  const reduceMotion = useReducedMotion();
 
   const goPrev = useCallback(
     () => onNavigate((index - 1 + items.length) % items.length),
@@ -42,12 +44,16 @@ export function Lightbox({
   if (!current) return null;
 
   return (
-    <div
+    <motion.div
       role="dialog"
       aria-modal="true"
       aria-label={`${current.event_title} gallery image`}
       className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-sm"
       onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
     >
       <button
         type="button"
@@ -81,9 +87,13 @@ export function Lightbox({
         <ChevronRight className="size-5" />
       </button>
 
-      <div
+      <motion.div
+        key={current.id}
         className="relative mx-4 flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden border border-border bg-card"
         onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.96, y: reduceMotion ? 0 : 8 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="relative aspect-[4/3] w-full">
           <PosterPlaceholder title={current.caption ?? current.event_title} />
@@ -103,7 +113,7 @@ export function Lightbox({
             <ArrowUpRight className="size-3.5" />
           </Link>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SectionHeading } from "@/components/site/section-heading";
 import { EventDirectory } from "@/components/events/event-directory";
+import { Reveal } from "@/components/site/reveal";
 import { getPublishedEvents, splitUpcomingPast } from "@/lib/data/events";
 
 export const metadata: Metadata = {
@@ -16,11 +17,13 @@ export default async function EventsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-      <SectionHeading
-        eyebrow="Everything, logged"
-        title="Workshops, hackathons, talks and the occasional donation drive."
-        description="Every event below traces back to a verified source — see docs/research.md for the trail."
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="Everything, logged"
+          title="Workshops, hackathons, talks and the occasional donation drive."
+          description="Every event below traces back to a verified source — see docs/research.md for the trail."
+        />
+      </Reveal>
 
       {events.length === 0 ? (
         <p className="mt-16 text-sm text-muted-foreground">
@@ -28,9 +31,9 @@ export default async function EventsPage() {
           will appear here.
         </p>
       ) : (
-        <div className="mt-10">
+        <Reveal delay={0.1} className="mt-10">
           <EventDirectory upcoming={upcoming} past={past} announced={announced} />
-        </div>
+        </Reveal>
       )}
     </div>
   );

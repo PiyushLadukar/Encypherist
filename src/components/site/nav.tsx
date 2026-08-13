@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, Lock, ArrowUpRight } from "lucide-react";
+import { Menu, Lock } from "lucide-react";
 import { Logo } from "@/components/site/logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -62,10 +62,6 @@ export function Nav({
         </div>
 
         <div className="hidden items-center gap-4 md:flex">
-          <span className="hidden items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground/70 xl:inline-flex">
-            <span className="status-dot" />
-            System // Online
-          </span>
           {featuredEvent && (
             <Link
               href={`/events/${featuredEvent.slug}`}
@@ -74,22 +70,6 @@ export function Nav({
               → {featuredEvent.title}
             </Link>
           )}
-          <Button
-            size="sm"
-            className="font-mono text-xs"
-            nativeButton={false}
-            render={<Link href="/#contact" />}
-          >
-            Join
-            <ArrowUpRight className="size-3.5" />
-          </Button>
-          <Link
-            href="/admin/login"
-            aria-label="Admin login"
-            className="text-muted-foreground/50 transition-colors hover:text-muted-foreground"
-          >
-            <Lock className="size-4" />
-          </Link>
         </div>
 
         <Sheet>

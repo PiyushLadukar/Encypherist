@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
@@ -5,42 +6,42 @@ import { cn } from "@/lib/utils";
  * §2/§5), so this mark was designed from the forum's real identity: the
  * cipher pun in its own name, rendered as a bracketed hex byte.
  */
-export function LogoMark({ className }: { className?: string }) {
+export function LogoMark({
+  className,
+  sizes = "(min-width: 640px) 320px, 240px",
+  quality = 90,
+}: {
+  className?: string;
+  /** Must describe the mark's true max rendered width — an undersized hint here is the #1 cause of a soft/blurry logo, since it makes Next.js fetch a smaller source than the box actually needs. */
+  sizes?: string;
+  quality?: number;
+}) {
   return (
-    <svg
-      viewBox="0 0 32 32"
-      fill="none"
-      aria-hidden="true"
-      className={cn("shrink-0", className)}
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-md transition-transform duration-300 ease-out group-hover:-rotate-3 group-hover:scale-110",
+        className
+      )}
     >
-      <rect x="1" y="1" width="30" height="30" rx="7" className="fill-card stroke-border" />
-      <path
-        d="M11 10 L6 16 L11 22"
-        stroke="var(--primary)"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
+      <Image
+        src="/logo.png"
+        alt="Encypherist logo"
+        fill
+        sizes={sizes}
+        quality={quality}
+        className="object-contain"
+        priority
       />
-      <path
-        d="M21 10 L26 16 L21 22"
-        stroke="var(--primary)"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      <circle cx="16" cy="16" r="1.6" className="fill-primary" />
-    </svg>
+    </div>
   );
 }
 
 export function Logo({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
+    <span className={cn("group inline-flex items-center gap-2.5", className)}>
       <LogoMark className="h-8 w-8" />
       <span className="flex flex-col leading-none">
-        <span className="font-heading text-base font-semibold tracking-tight text-foreground">
+        <span className="font-heading text-base font-semibold tracking-tight text-foreground transition-colors duration-300 group-hover:text-primary">
           ENCYPHERIST
         </span>
         <span className="font-mono text-[10px] tracking-[0.2em] text-muted-foreground">
