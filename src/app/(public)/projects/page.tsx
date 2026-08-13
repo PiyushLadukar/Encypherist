@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SectionHeading } from "@/components/site/section-heading";
 import { ProjectCard } from "@/components/projects/project-card";
+import { Reveal, Stagger, StaggerItem } from "@/components/site/reveal";
 import { getPublishedProjects } from "@/lib/data/projects";
 
 export const metadata: Metadata = {
@@ -15,11 +16,13 @@ export default async function ProjectsPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-      <SectionHeading
-        eyebrow="// BUILD_LOG"
-        title="What we've shipped."
-        description="A collection of real-world projects built by the Encypherist community. Focused on learning, building and deploying — not just simulating."
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="// BUILD_LOG"
+          title="What we've shipped."
+          description="A collection of real-world projects built by the Encypherist community. Focused on learning, building and deploying — not just simulating."
+        />
+      </Reveal>
 
       {projects.length === 0 ? (
         <div className="mt-16 max-w-lg border border-dashed border-border p-8">
@@ -33,11 +36,13 @@ export default async function ProjectsPage() {
           </p>
         </div>
       ) : (
-        <div className="mt-12 grid gap-5 sm:grid-cols-2">
+        <Stagger className="mt-12 grid gap-5 sm:grid-cols-2">
           {projects.map((project, i) => (
-            <ProjectCard key={project.id} project={project} index={i} />
+            <StaggerItem key={project.id} className="h-full">
+              <ProjectCard project={project} index={i} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       )}
     </div>
   );

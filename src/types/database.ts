@@ -12,7 +12,10 @@
  */
 
 export type Confidence = "verified" | "likely" | "unverified";
-export type TeamGroup = "final" | "third" | "second" | "history";
+// "faculty" and "history" (past-tenure alumni) are real values in the data
+// — memberStatus() in lib/format.ts already special-cases "history" — this
+// was just missing them.
+export type TeamGroup = "final" | "third" | "second" | "faculty" | "history";
 export type EventType =
   | "hackathon"
   | "workshop"
@@ -53,6 +56,7 @@ export type MemberRow = {
   bio: string | null;
   skills: string[];
   photo_url: string | null;
+  photo_position?: string | null;
   socials: MemberSocials;
   is_core: boolean;
   sort_order: number;

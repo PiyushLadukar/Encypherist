@@ -10,40 +10,53 @@ export function EventCard({ event, className }: { event: Event; className?: stri
     <Link
       href={`/events/${event.slug}`}
       className={cn(
-        "group relative flex flex-col overflow-hidden border border-border bg-card transition-colors hover:border-primary/40",
+        "group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl dark:hover:shadow-primary/5",
         className
       )}
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden border-b border-border bg-secondary">
-        <PosterPlaceholder title={event.title} />
-        <div className="absolute left-3 top-3 flex gap-1.5">
-          <span className="rounded-full border border-border bg-background/80 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground backdrop-blur">
+      <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/60 bg-black/90">
+        {event.poster_url ? (
+          <div className="relative h-full w-full overflow-hidden">
+            <img
+              src={event.poster_url}
+              alt={event.title}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            {/* Subtle vignette gradient overlay */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/20" />
+          </div>
+        ) : (
+          <PosterPlaceholder title={event.title} />
+        )}
+        <div className="absolute left-3 top-3 z-10 flex items-center gap-2">
+          <span className="rounded-md border border-white/20 bg-black/60 px-2.5 py-1 font-mono text-[10px] font-medium uppercase tracking-wider text-white shadow-sm backdrop-blur-md">
             {eventTypeLabel(event.type)}
           </span>
           <ConfidenceBadge confidence={event.confidence} />
         </div>
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-5">
-        <p className="font-mono text-xs text-primary">
-          <CalendarDays className="mr-1.5 inline size-3.5 -translate-y-px" />
+      <div className="flex flex-1 flex-col gap-2.5 p-5">
+        <p className="flex items-center gap-1.5 font-mono text-xs font-medium text-primary">
+          <CalendarDays className="size-3.5 text-primary" />
           {formatDateRange(event.start_at, event.end_at)}
         </p>
-        <h3 className="font-heading text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+        <h3 className="font-heading text-xl font-bold leading-tight tracking-tight text-foreground transition-colors group-hover:text-primary">
           {event.title}
         </h3>
         {event.summary && (
-          <p className="line-clamp-2 text-sm text-muted-foreground">{event.summary}</p>
+          <p className="line-clamp-2 text-sm text-muted-foreground/90 leading-relaxed">{event.summary}</p>
         )}
-        <div className="mt-auto flex items-center justify-between pt-3">
+        <div className="mt-auto flex items-center justify-between border-t border-border/40 pt-3.5">
           {event.location ? (
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <MapPin className="size-3.5" />
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+              <MapPin className="size-3.5 text-muted-foreground/70" />
               {event.location}
             </span>
           ) : (
             <span />
           )}
-          <span className="inline-flex items-center gap-1 font-mono text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100">
+          <span className="inline-flex items-center gap-1 font-mono text-xs font-semibold text-primary transition-transform duration-300 group-hover:translate-x-0.5">
             View
             <ArrowUpRight className="size-3.5" />
           </span>

@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useMemo, useState, Suspense } from "react";
 import { EventCard } from "@/components/events/event-card";
 import { EventTimeline } from "@/components/events/event-timeline";
+import { Stagger, StaggerItem } from "@/components/site/reveal";
 import { eventTypeLabel } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Event, EventType } from "@/types/database";
 
 type Tab = "upcoming" | "past" | "announced";
 
-export function EventDirectory({
+function EventDirectoryContent({
   upcoming,
   past,
   announced,
@@ -18,9 +20,28 @@ export function EventDirectory({
   past: Event[];
   announced: Event[];
 }) {
-  const initialTab: Tab = upcoming.length > 0 ? "upcoming" : announced.length > 0 ? "announced" : "past";
+  const searchParams = useSearchParams();
+  const paramTab = searchParams.get("tab") as Tab | null;
+
+  const initialTab: Tab = (paramTab && ["upcoming", "past", "announced"].includes(paramTab))
+    ? paramTab
+    : upcoming.length > 0 ? "upcoming" : announced.length > 0 ? "announced" : "past";
+
   const [tab, setTab] = useState<Tab>(initialTab);
   const [typeFilter, setTypeFilter] = useState<EventType | "all">("all");
+
+  // Re-syncs `tab` when the `?tab=` param changes under an already-mounted
+  // instance (e.g. a Link elsewhere on the site pointing at `?tab=announced`)
+  // — adjusted directly during render rather than in an effect, since
+  // setState-in-effect for a prop-driven value costs an extra render pass
+  // for no benefit; this is React's own recommended pattern for it.
+  const [prevParamTab, setPrevParamTab] = useState(paramTab);
+  if (paramTab !== prevParamTab) {
+    setPrevParamTab(paramTab);
+    if (paramTab && ["upcoming", "past", "announced"].includes(paramTab)) {
+      setTab(paramTab);
+    }
+  }
 
   const allTabs: { value: Tab; label: string; count: number }[] = [
     { value: "upcoming", label: "Upcoming", count: upcoming.length },
@@ -99,16 +120,30 @@ export function EventDirectory({
       {filtered.length === 0 ? (
         <p className="mt-16 text-center text-sm text-muted-foreground">No events to show.</p>
       ) : tab === "past" ? (
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <Stagger key={`${tab}-${typeFilter}`} className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <StaggerItem key={event.id} className="h-full">
+              <EventCard event={event} />
+            </StaggerItem>
           ))}
-        </div>
+        </Stagger>
       ) : (
         <div className="mt-10">
-          <EventTimeline events={filtered} />
+          <EventTimeline key={`${tab}-${typeFilter}`} events={filtered} />
         </div>
       )}
     </div>
+  );
+}
+
+export function EventDirectory(props: {
+  upcoming: Event[];
+  past: Event[];
+  announced: Event[];
+}) {
+  return (
+    <Suspense fallback={null}>
+      <EventDirectoryContent {...props} />
+    </Suspense>
   );
 }
