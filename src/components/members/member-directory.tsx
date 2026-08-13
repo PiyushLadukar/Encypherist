@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { MemberCard } from "@/components/members/member-card";
+import { Stagger, StaggerItem } from "@/components/site/reveal";
 import { teamGroupLabel } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Member, TeamGroup } from "@/types/database";
@@ -99,11 +100,16 @@ export function MemberDirectory({ members }: { members: Member[] }) {
                 <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-primary">
                   {teamGroupLabel(group)}
                 </h2>
-                <div className="mt-5 grid gap-5 items-start sm:grid-cols-2 lg:grid-cols-3">
+                <Stagger
+                  key={`${group}-${filter}-${query}`}
+                  className="mt-5 grid gap-5 items-start sm:grid-cols-2 lg:grid-cols-3"
+                >
                   {grouped.get(group)!.map((member) => (
-                    <MemberCard key={member.id} member={member} />
+                    <StaggerItem key={member.id}>
+                      <MemberCard member={member} />
+                    </StaggerItem>
                   ))}
-                </div>
+                </Stagger>
               </div>
             ))}
         </div>

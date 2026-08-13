@@ -25,7 +25,7 @@ export function ProjectCard({
     <Link
       href={`/projects/${project.slug}`}
       className={cn(
-        "group flex flex-col justify-between border border-border p-6 transition-colors hover:border-primary/40 sm:p-8",
+        "group flex h-full flex-col justify-between border border-border p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-xl dark:hover:shadow-primary/5 sm:p-8",
         className
       )}
     >

@@ -166,6 +166,38 @@
     border-right: 2px solid var(--primary);
   }
 
+  /* Continuous right-to-left member marquee (homepage). Plain CSS animation
+     rather than a JS-driven one so pausing is just `animation-play-state`,
+     which freezes in place instead of resetting position — and so it's
+     automatically neutralized by the `prefers-reduced-motion` block below,
+     same as every other animation on the site. */
+  .marquee-track {
+    animation: marquee-scroll var(--marquee-duration, 40s) linear infinite;
+  }
+  .marquee-track[data-paused="true"] {
+    animation-play-state: paused;
+  }
+  @keyframes marquee-scroll {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* Blinking terminal cursor — the trailing "_" on the hero headline. Left
+     under the blanket `prefers-reduced-motion` freeze (unlike the marquee):
+     it's decorative flavor text, not something anyone needs to stop. */
+  .cursor-blink {
+    animation: cursor-blink 1s step-end infinite;
+  }
+  @keyframes cursor-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
   /* Pulsing status dot — decorative "system online" indicator, never bound to
      real live data (see docs/cidc-analysis.md §6). */
   .status-dot {
@@ -210,5 +242,15 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* The member marquee is exempted from the blanket freeze above: it's not
+     autoplaying content someone stumbles into, it already has its own
+     stop control (hover or a single click freezes it in place), which
+     covers the same intent reduced-motion is asking for without losing the
+     feature outright. */
+  .marquee-track {
+    animation-duration: var(--marquee-duration, 40s) !important;
+    animation-iteration-count: infinite !important;
   }
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { SectionHeading } from "@/components/site/section-heading";
 import { MemberDirectory } from "@/components/members/member-directory";
+import { Reveal } from "@/components/site/reveal";
 import { getPublishedMembers } from "@/lib/data/members";
 
 export const metadata: Metadata = {
@@ -16,11 +17,13 @@ export default async function MembersPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-      <SectionHeading
-        eyebrow="The roster"
-        title="Meet the people behind the community."
-        description="Every tenure, a new council keeps Encypherist running — technical, creative, strategic and everything in between."
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="The roster"
+          title="Meet the people behind the community."
+          description="Every tenure, a new council keeps Encypherist running — technical, creative, strategic and everything in between."
+        />
+      </Reveal>
 
       {members.length === 0 ? (
         <p className="mt-16 text-sm text-muted-foreground">

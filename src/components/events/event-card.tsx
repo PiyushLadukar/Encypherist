@@ -10,7 +10,7 @@ export function EventCard({ event, className }: { event: Event; className?: stri
     <Link
       href={`/events/${event.slug}`}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl dark:hover:shadow-primary/5",
+        "group relative flex h-full flex-col overflow-hidden rounded-xl border border-border/80 bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl dark:hover:shadow-primary/5",
         className
       )}
     >

@@ -1,5 +1,20 @@
 [
   {
+    "slug": "sih-hackathon-2026",
+    "title": "SIH Hackathon 2026",
+    "type": "hackathon",
+    "status": "published",
+    "poster_url": null,
+    "summary": "Encypherist's run at Smart India Hackathon 2026 — team registration, problem statements and dates are coming soon.",
+    "description": null,
+    "start_at": null,
+    "end_at": null,
+    "location": null,
+    "registration_enabled": false,
+    "eligibility": "All CSE students",
+    "confidence": "unverified"
+  },
+  {
     "slug": "funfinity",
     "title": "Funfinity",
     "type": "other",

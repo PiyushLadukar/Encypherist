@@ -3,10 +3,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/site/section-heading";
-import { Reveal } from "@/components/site/reveal";
+import { Reveal, Stagger, StaggerItem } from "@/components/site/reveal";
 import { getPublishedMembers } from "@/lib/data/members";
 import { getPublishedEvents } from "@/lib/data/events";
-import { PRINCIPLES } from "@/lib/principles";
 import { formatDate } from "@/lib/format";
 import { ORG } from "@/lib/constants";
 
@@ -151,42 +150,6 @@ export default async function AboutPage() {
         </Reveal>
       </section>
 
-      {/* ---------------------------------------------------------- Principles */}
-      <section className="border-b border-border bg-card/30">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-          <Reveal>
-            <div className="max-w-2xl">
-              <div className="w-fit rounded-full border border-border bg-card px-5 py-3 font-heading text-xl font-bold uppercase tracking-[0.26em] text-foreground sm:text-2xl">
-                CORE PRINCIPLES
-              </div>
-              <h2 className="mt-6 text-balance font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-                How the system runs.
-              </h2>
-            </div>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <div className="mt-12 grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-              {PRINCIPLES.map((p) => (
-                <div key={p.number} className="bg-background p-6">
-                  <p className="font-mono text-xs text-primary">{p.number}</p>
-                  <h3 className="mt-3 font-heading text-xl font-semibold text-foreground">
-                    {p.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                    {p.description}
-                  </p>
-                  <div className="mt-4 border-t border-border pt-3 font-mono text-[10px] uppercase tracking-wider text-primary">
-                    {p.tag}
-                    <br />
-                    <span className="text-muted-foreground/70">{p.detail}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
       {/* --------------------------------------------------------------- Timeline */}
       {timeline.length > 0 && (
         <section className="border-b border-border">
@@ -196,9 +159,13 @@ export default async function AboutPage() {
               title="History, logged."
               description="Every entry below is a verified, dated activity — see docs/research.md for the source trail."
             />
-            <ol className="mt-14 relative border-l-2 border-border pl-8 sm:pl-10">
+            <Stagger as="ol" className="mt-14 relative border-l-2 border-border pl-8 sm:pl-10" stagger={0.06}>
               {timeline.map((event, i) => (
-                <li key={event.id} className={i !== timeline.length - 1 ? "relative pb-10" : "relative"}>
+                <StaggerItem
+                  as="li"
+                  key={event.id}
+                  className={i !== timeline.length - 1 ? "relative pb-10" : "relative"}
+                >
                   <span className="absolute -left-[41px] top-1 size-3 border-2 border-background bg-primary sm:-left-[49px]" />
                   <p className="font-mono text-xs text-primary">{formatDate(event.start_at)}</p>
                   <Link
@@ -210,9 +177,9 @@ export default async function AboutPage() {
                   {event.summary && (
                     <p className="mt-1 max-w-xl text-sm text-muted-foreground">{event.summary}</p>
                   )}
-                </li>
+                </StaggerItem>
               ))}
-            </ol>
+            </Stagger>
           </Reveal>
         </section>
       )}
