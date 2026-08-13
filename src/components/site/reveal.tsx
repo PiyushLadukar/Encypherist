@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-
-const EASE_PREMIUM = [0.22, 1, 0.36, 1] as const;
+import { EASE_PREMIUM } from "@/lib/motion";
 
 /**
  * Fades + lifts + un-blurs content into view once, on scroll — a single

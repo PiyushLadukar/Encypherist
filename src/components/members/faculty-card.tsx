@@ -10,7 +10,7 @@ import type { Member } from "@/types/database";
  */
 export function FacultyCard({ member }: { member: Member }) {
   return (
-    <Link href={`/members/${member.slug}`} className="relative mx-auto block w-full max-w-[220px] pt-3.5">
+    <Link href={`/member/${member.slug}`} className="relative mx-auto block w-full max-w-[220px] pt-3.5">
       <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-border bg-card px-2.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-primary shadow-sm">
         {member.designation}
       </span>

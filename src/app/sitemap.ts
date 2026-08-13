@@ -12,7 +12,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
-    { url: `${SITE_URL}/members`, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/member`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/events`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${SITE_URL}/gallery`, changeFrequency: "weekly", priority: 0.6 },
   ];
@@ -25,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const memberRoutes: MetadataRoute.Sitemap = members.map((member) => ({
-    url: `${SITE_URL}/members/${member.slug}`,
+    url: `${SITE_URL}/member/${member.slug}`,
     lastModified: member.updated_at,
     changeFrequency: "yearly",
     priority: 0.4,

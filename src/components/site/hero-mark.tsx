@@ -3,8 +3,7 @@
 import { useRef, type PointerEvent } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { LogoMark } from "@/components/site/logo";
-
-const EASE_PREMIUM = [0.22, 1, 0.36, 1] as const;
+import { EASE_PREMIUM } from "@/lib/motion";
 
 /**
  * Hero-only wrapper around `LogoMark` — kept separate from `LogoMark` itself

@@ -154,7 +154,7 @@ export default async function ProjectDetailPage({
                     member ? (
                       <li key={name}>
                         <Link
-                          href={`/members/${member.slug}`}
+                          href={`/member/${member.slug}`}
                           className="text-sm text-foreground/80 underline-offset-4 transition-colors hover:text-primary hover:underline"
                         >
                           {name}

@@ -3,17 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, Lock } from "lucide-react";
 import { Logo } from "@/components/site/logo";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
+import { MobileNav } from "@/components/site/mobile-nav";
 import { NAV_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +26,7 @@ export function Nav({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b transition-colors duration-300",
+        "sticky top-0 z-50 w-full border-b transition-colors duration-300 max-lg:pt-[env(safe-area-inset-top)]",
         scrolled
           ? "border-border bg-background/90 backdrop-blur-md"
           : "border-transparent bg-transparent"
@@ -72,71 +63,7 @@ export function Nav({
           )}
         </div>
 
-        <Sheet>
-          <SheetTrigger
-            render={
-              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open menu" />
-            }
-          >
-            <Menu className="size-5" />
-          </SheetTrigger>
-          <SheetContent side="right" className="w-full max-w-sm border-l border-border bg-background">
-            <SheetHeader>
-              <SheetTitle>
-                <Logo />
-              </SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col gap-1 px-4">
-              {NAV_LINKS.map((link) => (
-                <SheetClose
-                  key={link.href}
-                  nativeButton={false}
-                  render={
-                    <Link
-                      href={link.href}
-                      className="rounded-md px-3 py-3 font-heading text-lg text-foreground transition-colors hover:text-primary"
-                    />
-                  }
-                >
-                  {link.label}
-                </SheetClose>
-              ))}
-              {featuredEvent && (
-                <SheetClose
-                  key="featured-event"
-                  nativeButton={false}
-                  render={<Link href={`/events/${featuredEvent.slug}`} className="rounded-md px-3 py-3 font-mono text-xs text-primary" />}
-                >
-                  → {featuredEvent.title}
-                </SheetClose>
-              )}
-              <SheetClose
-                nativeButton={false}
-                render={
-                  <Button
-                    className="mt-4 w-full font-mono text-xs"
-                    nativeButton={false}
-                    render={<Link href="/#contact" />}
-                  />
-                }
-              >
-                Join
-              </SheetClose>
-              <SheetClose
-                nativeButton={false}
-                render={
-                  <Link
-                    href="/admin/login"
-                    className="mt-8 flex items-center gap-2 rounded-md px-3 py-2 font-mono text-xs uppercase tracking-wider text-muted-foreground/60"
-                  />
-                }
-              >
-                <Lock className="size-3.5" />
-                Admin login
-              </SheetClose>
-            </div>
-          </SheetContent>
-        </Sheet>
+        <MobileNav featuredEvent={featuredEvent} />
       </nav>
     </header>
   );
