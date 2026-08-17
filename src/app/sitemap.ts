@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getPublishedEvents } from "@/lib/data/events";
 import { getPublishedMembers } from "@/lib/data/members";
+import { galleryEvents } from "@/data/gallery";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -31,5 +32,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.4,
   }));
 
-  return [...staticRoutes, ...eventRoutes, ...memberRoutes];
+  const galleryRoutes: MetadataRoute.Sitemap = galleryEvents.map((event) => ({
+    url: `${SITE_URL}/gallery/${event.id}`,
+    changeFrequency: "yearly",
+    priority: 0.5,
+  }));
+
+  return [...staticRoutes, ...eventRoutes, ...memberRoutes, ...galleryRoutes];
 }
