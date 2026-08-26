@@ -1,26 +1,48 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import { ArrowLeft, ArrowUpRight, Images } from "lucide-react";
 import { Lightbox } from "@/components/gallery/lightbox";
-import type { GalleryEvent } from "@/data/gallery";
+import { DEFAULT_ACADEMIC_YEARS, type GalleryEvent } from "@/data/gallery";
 
 const galleryEase = [0.22, 1, 0.36, 1] as const;
-const dicePositions = [
-  "col-span-1 lg:col-start-1 lg:row-start-1 lg:pt-2",
-  "col-span-1 lg:col-start-3 lg:row-start-1 lg:-mt-6",
-  "col-span-1 sm:col-span-2 lg:col-span-1 lg:col-start-2 lg:row-start-2 lg:scale-[1.045] lg:py-3",
-  "col-span-1 lg:col-start-1 lg:row-start-3 lg:mt-5",
-  "col-span-1 lg:col-start-3 lg:row-start-3 lg:-mt-3",
-];
-const firstCompositionPositions = [0, 1, 2, 4, 3];
+
+function formatYearLabel(year: string) {
+  return year.replace(/[-–—]/g, " — ");
+}
 
 export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
   const [selectedEvent, setSelectedEvent] = useState<GalleryEvent | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  if (events.length === 0) {
+  // Group academic years (newest first, starting with 2026–27)
+  const academicYears = useMemo(() => {
+    const yearsSet = new Set<string>(DEFAULT_ACADEMIC_YEARS);
+    events.forEach((e) => {
+      if (e.academicYear) yearsSet.add(e.academicYear);
+    });
+    return Array.from(yearsSet).sort((a, b) => b.localeCompare(a));
+  }, [events]);
+
+  // Set 2026–27 expanded initially
+  const [openYears, setOpenYears] = useState<Set<string>>(
+    () => new Set(["2026–27"])
+  );
+
+  const toggleYear = (year: string) => {
+    setOpenYears((prev) => {
+      const next = new Set(prev);
+      if (next.has(year)) {
+        next.delete(year);
+      } else {
+        next.add(year);
+      }
+      return next;
+    });
+  };
+
+  if (events.length === 0 && academicYears.length === 0) {
     return (
       <div className="border border-dashed border-border px-6 py-14 text-center">
         <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Archive pending</p>
@@ -73,7 +95,7 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
                   transition={{ duration: 0.3, delay: 0.1, ease: galleryEase }}
                   className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
                 >
-                  Event archive • {String(events.findIndex((e) => e.id === selectedEvent.id) + 1).padStart(2, "0")} / {String(events.length).padStart(2, "0")}
+                  Event archive • {selectedEvent.academicYear || "2025–26"}
                 </motion.p>
                 <motion.h2 layoutId={`title-${selectedEvent.id}`} className="mt-2 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
                   {selectedEvent.title}
@@ -129,82 +151,136 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
           </motion.section>
         ) : (
           <motion.div
-            key="gallery-events"
+            key="gallery-years-list"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.32, ease: galleryEase }}
-            className="mx-auto max-w-5xl"
+            className="mx-auto max-w-5xl space-y-12 sm:space-y-16"
           >
-            {[events.slice(0, 5), events.slice(5, 10)].map((group, groupIndex) => (
-              <motion.section
-                key={`archive-group-${groupIndex + 1}`}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{ duration: 0.5, delay: groupIndex === 0 ? 0.06 : 0, ease: galleryEase }}
-                className={groupIndex === 0 ? "" : "mt-24 pt-10 sm:mt-32"}
-              >
-                {groupIndex === 1 && (
-                  <div className="mb-16 sm:mb-24 flex items-center justify-center gap-4 text-center">
-                    <div className="h-px flex-1 bg-border/40" />
-                    <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-muted-foreground/70">
-                      Archive Collection • Part II
-                    </span>
-                    <div className="h-px flex-1 bg-border/40" />
-                  </div>
-                )}
-                <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-14 lg:grid-cols-3 lg:grid-rows-3 lg:gap-x-16 lg:gap-y-16">
-                  {group.map((event, positionIndex) => {
-                    const eventIndex = groupIndex * 5 + positionIndex;
-                    const dicePosition = groupIndex === 0 ? firstCompositionPositions[positionIndex] : positionIndex;
+            {academicYears.map((year) => {
+              const yearEvents = events.filter(
+                (e) => (e.academicYear || "2025–26") === year
+              );
+              const isOpen = openYears.has(year);
+              const countText = `${String(yearEvents.length).padStart(2, "0")} ${
+                yearEvents.length === 1 ? "EVENT" : "EVENTS"
+              }`;
 
-                    return (
-                      <motion.button
-                        key={event.id}
-                        type="button"
-                        initial={{ opacity: 0, y: 16, scale: 0.98 }}
-                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                        viewport={{ once: true, amount: 0.15 }}
-                        exit={{ opacity: 0, y: -8, scale: 0.985 }}
-                        whileHover={{ y: -4 }}
-                        whileTap={{ scale: 0.985 }}
-                        transition={{ duration: 0.46, delay: Math.min(positionIndex * 0.07, 0.28), ease: galleryEase }}
-                        onClick={() => setSelectedEvent(event)}
-                        className={`group w-full text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary ${dicePositions[dicePosition]}`}
-                        aria-label={`Open ${event.title} photo gallery`}
+              return (
+                <section key={year} className="w-full">
+                  <button
+                    type="button"
+                    onClick={() => toggleYear(year)}
+                    className="group flex w-full items-center justify-between py-4 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                    aria-expanded={isOpen}
+                  >
+                    <h2 className="font-heading text-2xl sm:text-4xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                      {formatYearLabel(year)}
+                    </h2>
+                    <div className="flex items-center gap-4 sm:gap-6">
+                      <span className="font-mono text-xs sm:text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground group-hover:text-foreground transition-colors">
+                        {countText}
+                      </span>
+                      <span className="flex size-7 items-center justify-center font-mono text-lg font-normal text-muted-foreground transition-colors group-hover:text-primary">
+                        {isOpen ? "−" : "+"}
+                      </span>
+                    </div>
+                  </button>
+                  <div className="h-px w-full bg-border/60 mb-6 sm:mb-8" />
+
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.36, ease: galleryEase }}
+                        className="overflow-hidden"
                       >
-                        <motion.div
-                          layoutId={`poster-${event.id}`}
-                          transition={{ duration: 0.52, ease: galleryEase }}
-                          className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-muted/80 p-2 shadow-sm border border-border/40 transition-all duration-500 group-hover:-translate-y-0.5 group-hover:border-border/80 group-hover:shadow-xl"
-                        >
-                          <img
-                            src={event.poster}
-                            alt={`${event.title} event poster`}
-                            className="max-h-full max-w-full object-contain transition-transform duration-700 ease-out group-hover:scale-[1.018]"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent opacity-70 transition-opacity duration-500 group-hover:opacity-90" />
-                          <span className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 bg-background/90 px-2.5 py-1 font-mono text-[10px] text-foreground backdrop-blur-md border border-border/40 transition-transform duration-300 group-hover:-translate-y-0.5">
-                            <Images className="size-3 text-muted-foreground" /> {event.images.length}
-                          </span>
-                        </motion.div>
-                        <div className="mt-3.5 flex items-start justify-between gap-3 border-l-2 border-border/50 pl-3.5 pt-0.5 transition-colors duration-300 group-hover:border-primary/70">
-                          <div>
-                            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80">
-                              ARCHIVE {String(eventIndex + 1).padStart(2, "0")} / {String(events.length).padStart(2, "0")}
-                            </p>
-                            <motion.h2 layoutId={`title-${event.id}`} className="mt-1 font-heading text-xl sm:text-2xl font-semibold tracking-tight text-foreground transition-transform duration-300 group-hover:translate-x-0.5">{event.title}</motion.h2>
-                            {event.description && <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{event.description}</p>}
-                          </div>
-                          <ArrowUpRight className="mt-1 size-4 shrink-0 text-muted-foreground/70 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
+                        <div className="space-y-6 sm:space-y-8 pb-4">
+                          {yearEvents.length === 0 ? (
+                            <div className="border border-dashed border-border/50 px-6 py-12 text-center bg-card/30">
+                              <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Archive pending</p>
+                              <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-muted-foreground/80">
+                                Event photographs for {year} will appear here as they are added to the gallery.
+                              </p>
+                            </div>
+                          ) : (
+                            yearEvents.map((event, index) => {
+                              const eventIndexStr = String(index + 1).padStart(2, "0");
+
+                              return (
+                                <motion.button
+                                  key={event.id}
+                                  type="button"
+                                  initial={{ opacity: 0, y: 14 }}
+                                  animate={{ opacity: 1, y: 0 }}
+                                  exit={{ opacity: 0, y: -8 }}
+                                  whileHover={{ y: -2 }}
+                                  whileTap={{ scale: 0.995 }}
+                                  transition={{
+                                    duration: 0.38,
+                                    delay: Math.min(index * 0.05, 0.25),
+                                    ease: galleryEase,
+                                  }}
+                                  onClick={() => setSelectedEvent(event)}
+                                  className="group relative flex w-full flex-col gap-6 rounded-xl border border-border/40 bg-card/60 p-5 text-left transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-xl sm:p-6 lg:flex-row lg:items-center lg:justify-between focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                                  aria-label={`Open ${event.title} photo gallery`}
+                                >
+                                  {/* Left: Event Information */}
+                                  <div className="flex flex-1 flex-col justify-center lg:pr-6">
+                                    <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary/80 font-medium">
+                                      {eventIndexStr} / {event.title}
+                                    </p>
+                                    <motion.h3
+                                      layoutId={`title-${event.id}`}
+                                      className="mt-1.5 font-heading text-xl sm:text-2xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary"
+                                    >
+                                      {event.title}
+                                    </motion.h3>
+                                    {event.description && (
+                                      <p className="mt-2 line-clamp-2 text-xs sm:text-sm leading-6 text-muted-foreground/90">
+                                        {event.description}
+                                      </p>
+                                    )}
+                                    <div className="mt-4 flex items-center gap-3">
+                                      <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground bg-muted/60 px-2.5 py-1 rounded border border-border/40">
+                                        <Images className="size-3 text-muted-foreground/80" />
+                                        {event.images.length} {event.images.length === 1 ? "photo" : "photos"}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Right: Enlarged Event Poster Image (~35-40% width on desktop) */}
+                                  <motion.div
+                                    layoutId={`poster-${event.id}`}
+                                    transition={{ duration: 0.48, ease: galleryEase }}
+                                    className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border border-border/50 bg-muted/80 lg:w-[38%] shrink-0 transition-all duration-500 group-hover:border-primary/50 group-hover:shadow-md"
+                                  >
+                                    <img
+                                      src={event.poster}
+                                      alt={`${event.title} event poster`}
+                                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
+                                  </motion.div>
+
+                                  {/* Far Right: Arrow Action */}
+                                  <div className="hidden shrink-0 pl-2 lg:block">
+                                    <ArrowUpRight className="size-5 text-muted-foreground/70 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-primary" />
+                                  </div>
+                                </motion.button>
+                              );
+                            })
+                          )}
                         </div>
-                      </motion.button>
-                    );
-                  })}
-                </div>
-              </motion.section>
-            ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </section>
+              );
+            })}
           </motion.div>
         )}
         </AnimatePresence>

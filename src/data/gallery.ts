@@ -12,7 +12,10 @@ export interface GalleryEvent {
   description?: string;
   poster: string;
   images: string[];
+  academicYear?: string;
 }
+
+export const DEFAULT_ACADEMIC_YEARS = ["2026–27", "2025–26"];
 
 export const galleryEvents: GalleryEvent[] = [
   {
@@ -20,59 +23,69 @@ export const galleryEvents: GalleryEvent[] = [
     title: "Disha",
     poster: "/gallery/disha/poster.jpg",
     images: Array.from({ length: 6 }, (_, index) => `/gallery/disha/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "techverse",
     title: "Techverse",
     poster: "/gallery/techverse/poster.jpg",
     images: Array.from({ length: 7 }, (_, index) => `/gallery/techverse/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "portfolio",
     title: "Portfolio",
     poster: "/gallery/portfolio/poster.jpg",
     images: Array.from({ length: 5 }, (_, index) => `/gallery/portfolio/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "gen-ai",
     title: "Gen AI",
     poster: "/gallery/gen-ai/poster.jpg",
     images: Array.from({ length: 7 }, (_, index) => `/gallery/gen-ai/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "cyber-security-talk",
     title: "Cyber Security Talk",
     poster: "/gallery/cyber-security-talk/poster.jpg",
     images: Array.from({ length: 6 }, (_, index) => `/gallery/cyber-security-talk/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "donation-drive",
     title: "Donation Drive",
     poster: "/gallery/donation-drive/poster.jpg",
     images: Array.from({ length: 7 }, (_, index) => `/gallery/donation-drive/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "vision-x",
     title: "Vision X",
     poster: "/gallery/vision-x/poster.jpg",
     images: Array.from({ length: 5 }, (_, index) => `/gallery/vision-x/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "ganesh-utsav",
     title: "Ganesh Utsav",
     poster: "/gallery/ganesh-utsav/poster.jpg",
     images: Array.from({ length: 10 }, (_, index) => `/gallery/ganesh-utsav/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "funfinity",
     title: "Funfinity",
     poster: "/gallery/funfinity/poster.jpeg",
     images: Array.from({ length: 5 }, (_, index) => `/gallery/funfinity/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
   {
     id: "installation",
     title: "Installation",
     poster: "/gallery/installation/poster.jpg",
     images: Array.from({ length: 9 }, (_, index) => `/gallery/installation/photo-${index + 1}.jpg`),
+    academicYear: "2025–26",
   },
 ];
