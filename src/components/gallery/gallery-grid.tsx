@@ -12,7 +12,8 @@ function formatYearLabel(year: string) {
   return year.replace(/[-–—]/g, " — ");
 }
 
-export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
+export function GalleryGrid({ events: initialEvents }: { events: GalleryEvent[] }) {
+  const [events, setEvents] = useState<GalleryEvent[]>(initialEvents);
   const [selectedEvent, setSelectedEvent] = useState<GalleryEvent | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -65,39 +66,40 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
             exit={{ opacity: 0, y: -8, scale: 0.992 }}
             transition={{ duration: 0.46, ease: galleryEase }}
           >
-            <div className="mb-8 grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1.35fr)_minmax(15rem,0.65fr)] lg:items-end">
+            {/* Event Detail Hero Layout: 60-65% Hero Image space on desktop */}
+            <div className="mb-10 grid gap-8 border-b border-border/80 pb-10 lg:grid-cols-[minmax(0,1.65fr)_minmax(14rem,1fr)] lg:items-center">
               <motion.div
                 layoutId={`poster-${selectedEvent.id}`}
                 transition={{ duration: 0.52, ease: galleryEase }}
-                className="order-last flex aspect-video items-center justify-center overflow-hidden bg-muted lg:order-first"
+                className="order-last flex aspect-video sm:aspect-[16/10] max-h-[68vh] w-full items-center justify-center overflow-hidden rounded-2xl border border-border/70 bg-muted/80 shadow-lg lg:order-first"
               >
                 <img
                   src={selectedEvent.poster}
                   alt={`${selectedEvent.title} event poster`}
-                  className="block max-h-[44vh] max-w-full object-contain"
+                  className="block max-h-full max-w-full object-contain"
                 />
               </motion.div>
-              <div className="flex flex-col justify-end lg:pb-2">
+              <div className="flex flex-col justify-center lg:pl-2">
                 <motion.button
                   type="button"
                   onClick={() => setSelectedEvent(null)}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.08, ease: galleryEase }}
-                  className="mb-5 inline-flex items-center gap-2 font-mono text-xs text-muted-foreground transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                  className="mb-6 inline-flex items-center gap-2.5 font-mono text-sm font-medium text-muted-foreground transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                 >
-                  <ArrowLeft className="size-3.5" />
+                  <ArrowLeft className="size-4" />
                   Back to Gallery
                 </motion.button>
                 <motion.p
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: 0.1, ease: galleryEase }}
-                  className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground"
+                  className="font-mono text-xs font-semibold uppercase tracking-widest text-primary"
                 >
-                  Event archive • {selectedEvent.academicYear || "2025–26"}
+                  EVENT ARCHIVE • {selectedEvent.academicYear || "2025–26"}
                 </motion.p>
-                <motion.h2 layoutId={`title-${selectedEvent.id}`} className="mt-2 font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
+                <motion.h2 layoutId={`title-${selectedEvent.id}`} className="mt-2 font-heading text-3xl font-bold tracking-tight text-foreground sm:text-5xl">
                   {selectedEvent.title}
                 </motion.h2>
                 {selectedEvent.description && (
@@ -105,19 +107,22 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.34, delay: 0.12, ease: galleryEase }}
-                    className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground"
+                    className="mt-3.5 max-w-2xl text-sm sm:text-base leading-relaxed text-muted-foreground"
                   >
                     {selectedEvent.description}
                   </motion.p>
                 )}
-                <motion.p
+                <motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.34, delay: 0.14, ease: galleryEase }}
-                  className="mt-5 font-mono text-xs text-muted-foreground"
+                  className="mt-6 flex items-center gap-3"
                 >
-                  {selectedEvent.images.length} {selectedEvent.images.length === 1 ? "photograph" : "photographs"}
-                </motion.p>
+                  <span className="inline-flex items-center gap-2 font-mono text-xs text-muted-foreground/90 bg-muted/60 px-3 py-1.5 rounded-md border border-border/50">
+                    <Images className="size-4 text-muted-foreground" />
+                    {selectedEvent.images.length} {selectedEvent.images.length === 1 ? "photograph" : "photographs"}
+                  </span>
+                </motion.div>
               </div>
             </div>
 
@@ -136,7 +141,7 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ duration: 0.36, delay: 0.12 + Math.min(index * 0.04, 0.28), ease: galleryEase }}
                   onClick={() => setOpenIndex(index)}
-                  className="group relative mb-4 block w-full break-inside-avoid overflow-hidden bg-card text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  className="group relative mb-4 block w-full break-inside-avoid overflow-hidden rounded-xl bg-card text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   aria-label={`Open photo ${index + 1} from ${selectedEvent.title}`}
                 >
                   <img
@@ -156,7 +161,7 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.32, ease: galleryEase }}
-            className="mx-auto max-w-5xl space-y-12 sm:space-y-16"
+            className="mx-auto max-w-5xl space-y-6 sm:space-y-8"
           >
             {academicYears.map((year) => {
               const yearEvents = events.filter(
@@ -172,12 +177,14 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
                   <button
                     type="button"
                     onClick={() => toggleYear(year)}
-                    className="group flex w-full items-center justify-between py-4 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                    className="group flex w-full items-center justify-between py-3 sm:py-4 text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                     aria-expanded={isOpen}
                   >
-                    <h2 className="font-heading text-2xl sm:text-4xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                      {formatYearLabel(year)}
-                    </h2>
+                    <div className="flex items-center gap-3">
+                      <h2 className="font-heading text-2xl sm:text-3xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                        {formatYearLabel(year)}
+                      </h2>
+                    </div>
                     <div className="flex items-center gap-4 sm:gap-6">
                       <span className="font-mono text-xs sm:text-sm font-medium uppercase tracking-[0.18em] text-muted-foreground group-hover:text-foreground transition-colors">
                         {countText}
@@ -187,7 +194,7 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
                       </span>
                     </div>
                   </button>
-                  <div className="h-px w-full bg-border/60 mb-6 sm:mb-8" />
+                  <div className="h-px w-full bg-border/60 mb-4 sm:mb-6" />
 
                   <AnimatePresence initial={false}>
                     {isOpen && (
@@ -198,9 +205,9 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
                         transition={{ duration: 0.36, ease: galleryEase }}
                         className="overflow-hidden"
                       >
-                        <div className="space-y-6 sm:space-y-8 pb-4">
+                        <div className="space-y-4 sm:space-y-5 pb-2">
                           {yearEvents.length === 0 ? (
-                            <div className="border border-dashed border-border/50 px-6 py-12 text-center bg-card/30">
+                            <div className="border border-dashed border-border/50 px-6 py-10 text-center bg-card/30 rounded-xl">
                               <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Archive pending</p>
                               <p className="mx-auto mt-2 max-w-md text-xs leading-5 text-muted-foreground/80">
                                 Event photographs for {year} will appear here as they are added to the gallery.
@@ -225,50 +232,58 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
                                     ease: galleryEase,
                                   }}
                                   onClick={() => setSelectedEvent(event)}
-                                  className="group relative flex w-full flex-col gap-6 rounded-xl border border-border/40 bg-card/60 p-5 text-left transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-xl sm:p-6 lg:flex-row lg:items-center lg:justify-between focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                                  className="group relative flex w-full flex-col sm:flex-row h-auto sm:h-[260px] lg:h-[270px] overflow-hidden rounded-2xl border border-border/80 bg-card/90 shadow-sm transition-all duration-300 hover:border-primary/40 hover:bg-card hover:shadow-md text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
                                   aria-label={`Open ${event.title} photo gallery`}
                                 >
-                                  {/* Left: Event Information */}
-                                  <div className="flex flex-1 flex-col justify-center lg:pr-6">
-                                    <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary/80 font-medium">
-                                      {eventIndexStr} / {event.title}
-                                    </p>
-                                    <motion.h3
-                                      layoutId={`title-${event.id}`}
-                                      className="mt-1.5 font-heading text-xl sm:text-2xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary"
-                                    >
-                                      {event.title}
-                                    </motion.h3>
-                                    {event.description && (
-                                      <p className="mt-2 line-clamp-2 text-xs sm:text-sm leading-6 text-muted-foreground/90">
-                                        {event.description}
-                                      </p>
-                                    )}
-                                    <div className="mt-4 flex items-center gap-3">
-                                      <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground bg-muted/60 px-2.5 py-1 rounded border border-border/40">
-                                        <Images className="size-3 text-muted-foreground/80" />
-                                        {event.images.length} {event.images.length === 1 ? "photo" : "photos"}
-                                      </span>
-                                    </div>
-                                  </div>
+                                  {/* Large watermark number in top right corner matching reference image */}
+                                  <span className="absolute top-2 right-6 font-mono text-6xl sm:text-7xl font-bold tracking-tighter text-foreground/5 dark:text-foreground/10 pointer-events-none select-none hidden sm:block">
+                                    {eventIndexStr}
+                                  </span>
 
-                                  {/* Right: Enlarged Event Poster Image (~35-40% width on desktop) */}
+                                  {/* Integrated Left Cover Image (~50% width on desktop, flush to top/bottom/left edges with zero padding) */}
                                   <motion.div
                                     layoutId={`poster-${event.id}`}
                                     transition={{ duration: 0.48, ease: galleryEase }}
-                                    className="relative aspect-[16/10] w-full overflow-hidden rounded-lg border border-border/50 bg-muted/80 lg:w-[38%] shrink-0 transition-all duration-500 group-hover:border-primary/50 group-hover:shadow-md"
+                                    className="relative h-48 sm:h-full w-full sm:w-1/2 shrink-0 overflow-hidden bg-muted/80"
                                   >
                                     <img
                                       src={event.poster}
                                       alt={`${event.title} event poster`}
-                                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.028]"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-40" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-50 transition-opacity duration-300 group-hover:opacity-30" />
                                   </motion.div>
 
-                                  {/* Far Right: Arrow Action */}
-                                  <div className="hidden shrink-0 pl-2 lg:block">
-                                    <ArrowUpRight className="size-5 text-muted-foreground/70 transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:text-primary" />
+                                  {/* Right: Information Column (50% width on desktop) */}
+                                  <div className="flex flex-1 flex-col justify-between p-5 sm:p-6 lg:p-7 sm:w-1/2 relative z-10">
+                                    <div>
+                                      <p className="font-mono text-xs font-semibold uppercase tracking-wider text-primary">
+                                        EVENT / {eventIndexStr}
+                                      </p>
+                                      <motion.h3
+                                        layoutId={`title-${event.id}`}
+                                        className="mt-1.5 font-heading text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary"
+                                      >
+                                        {event.title}
+                                      </motion.h3>
+                                      {event.description && (
+                                        <p className="mt-2 line-clamp-2 text-xs sm:text-sm leading-relaxed text-muted-foreground/90 max-w-md">
+                                          {event.description}
+                                        </p>
+                                      )}
+                                    </div>
+
+                                    <div className="mt-4 sm:mt-6 flex items-center justify-between">
+                                      <span className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground/80 bg-muted/50 px-2.5 py-1 rounded-md border border-border/40">
+                                        <Images className="size-3.5 text-muted-foreground" />
+                                        {event.images.length} {event.images.length === 1 ? "photograph" : "photographs"}
+                                      </span>
+
+                                      {/* Circular Arrow Button matching reference image */}
+                                      <div className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-primary border border-primary/20 transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-105">
+                                        <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                                      </div>
+                                    </div>
                                   </div>
                                 </motion.button>
                               );
