@@ -15,7 +15,6 @@ PDF hosted there, and the forum's public Instagram bio), not invented. See
 [`docs/research.md`](docs/research.md) for the full research trail: what's verified,
 what's "likely" but unconfirmed, and what's flagged as a placeholder.
 
-
 The visual language is an original system reverse-engineered from what makes
 [cidc.dev](https://www.cidc.dev/) read as a premium engineering-org site rather than a
 college club page — bounded canvas framing, a two-accent-color discipline, monospace
