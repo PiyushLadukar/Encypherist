@@ -31,11 +31,14 @@ export function EventDetailView({
   event,
   registeredCount,
   interactive = true,
+  registrationType,
 }: {
   event: EventWithDetails;
   registeredCount: number;
   /** false in admin preview: no live registration CTA on unpublished content. */
   interactive?: boolean;
+  /** "Individual" / "Team" / "Individual or Team" — omitted when not applicable. */
+  registrationType?: string;
 }) {
   const registration = registrationState(event, registeredCount);
 
@@ -83,6 +86,7 @@ export function EventDetailView({
                 <Users className="size-4 text-primary" />
                 {registeredCount}
                 {event.capacity ? ` / ${event.capacity}` : ""} registered
+                {registrationType && ` · ${registrationType}`}
               </p>
             )}
           </div>
