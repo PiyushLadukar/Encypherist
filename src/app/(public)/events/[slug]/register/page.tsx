@@ -62,7 +62,12 @@ export default async function EventRegisterPage({
             {closedReason}
           </p>
         ) : (
-          <RegistrationForm eventSlug={event.slug} eventTitle={event.title} />
+          <RegistrationForm
+            eventSlug={event.slug}
+            eventTitle={event.title}
+            registrationConfig={event.registrationConfig}
+            registrationForm={event.registrationForm}
+          />
         )}
       </div>
     </div>
