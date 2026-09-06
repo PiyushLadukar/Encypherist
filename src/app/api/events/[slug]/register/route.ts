@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
-import { store } from "@/lib/store";
-import { registrationSchema } from "@/lib/validation/registration";
-import { isPast } from "@/lib/format";
+import { getCollections } from "@/lib/mongodb";
+import { getEventBySlugAdmin } from "@/lib/data/admin-events";
+import { isRegistrationOpen } from "@/lib/event-status";
+import { buildRegistrationSchema, checkEligibility } from "@/lib/validation/registration";
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+
+  const event = await getEventBySlugAdmin(slug);
+  if (!event || event.status !== "published") {
+    return NextResponse.json({ error: "Event not found." }, { status: 404 });
+  }
+
+  const registrationState = isRegistrationOpen(event);
+  if (!registrationState.open) {
+    return NextResponse.json({ error: registrationState.reason }, { status: 403 });
+  }
 
   let body: unknown;
   try {
@@ -17,51 +24,53 @@ export async function POST(
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const parsed = registrationSchema.safeParse(body);
+  // Never trust the client's declared registration type/team size/required
+  // fields — re-derive and re-validate the whole schema from the event's
+  // live server-side configuration.
+  const schema = buildRegistrationSchema(event);
+  const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Please check the form for errors.", issues: parsed.error.flatten().fieldErrors },
+      { error: "Please check the form for errors.", issues: parsed.error.flatten() },
       { status: 400 }
     );
   }
+  const data = parsed.data;
 
-  const event = store.events.find((e) => e.slug === slug);
-
-  if (!event || event.status !== "published") {
-    return NextResponse.json({ error: "Event not found." }, { status: 404 });
-  }
-  if (!event.registration_enabled) {
-    return NextResponse.json({ error: "Registration isn't open for this event." }, { status: 403 });
-  }
-  if (event.registration_deadline && isPast(event.registration_deadline)) {
-    return NextResponse.json({ error: "Registration has closed." }, { status: 403 });
+  const responsible = data.registrationType === "team" ? data.team.leader : data.individual;
+  const eligibility = checkEligibility(event, responsible);
+  if (!eligibility.eligible) {
+    return NextResponse.json({ error: eligibility.reason }, { status: 403 });
   }
 
-  const existingCount = store.eventRegistrations.filter((r) => r.event_id === event.id).length;
-  if (event.capacity && existingCount >= event.capacity) {
-    return NextResponse.json({ error: "This event is full." }, { status: 403 });
-  }
-
-  const { branch, year, ...rest } = parsed.data;
-
-  const alreadyRegistered = store.eventRegistrations.some(
-    (r) => r.event_id === event.id && r.email.toLowerCase() === rest.email.toLowerCase()
-  );
-  if (alreadyRegistered) {
+  const { registrations } = await getCollections();
+  const email = responsible.email.toLowerCase();
+  const duplicate = await registrations.findOne({
+    eventId: event.id,
+    deletedAt: null,
+    $or: [{ "individual.email": email }, { "team.leader.email": email }],
+  });
+  if (duplicate) {
     return NextResponse.json(
       { error: "You've already registered for this event with this email." },
       { status: 409 }
     );
   }
 
-  store.eventRegistrations.push({
-    id: randomUUID(),
-    event_id: event.id,
-    ...rest,
-    branch: branch || null,
-    year: year || null,
-    extra: {},
-    created_at: new Date().toISOString(),
+  const now = new Date();
+  await registrations.insertOne({
+    eventId: event.id,
+    registrationType: data.registrationType,
+    status: "pending",
+    deletedAt: null,
+    formVersion: event.registrationForm.version,
+    formSnapshot: event.registrationForm.fields,
+    responses: data.responses,
+    individual: data.registrationType === "individual" ? data.individual : null,
+    team: data.registrationType === "team" ? data.team : null,
+    submittedAt: now,
+    updatedAt: now,
+    updatedBy: null,
   });
 
   return NextResponse.json({ success: true }, { status: 201 });
