@@ -16,9 +16,15 @@ interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: (newEvent: any) => void;
+  academicYear?: string;
 }
 
-export function CreateEventModal({ isOpen, onClose, onSuccess }: CreateEventModalProps) {
+export function CreateEventModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  academicYear = "2026–27",
+}: CreateEventModalProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
 
   // Step 1 State
@@ -82,6 +88,7 @@ export function CreateEventModal({ isOpen, onClose, onSuccess }: CreateEventModa
       const formData = new FormData();
       formData.append("title", title.trim());
       formData.append("description", description.trim());
+      formData.append("academicYear", academicYear);
       formData.append("poster", posterFile);
       photos.forEach((photo) => {
         formData.append("photos", photo);
@@ -122,7 +129,7 @@ export function CreateEventModal({ isOpen, onClose, onSuccess }: CreateEventModa
         <div className="flex items-center justify-between border-b border-border/60 px-6 py-4">
           <div>
             <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-primary">
-              2026–27 GALLERY ARCHIVE
+              {academicYear} GALLERY ARCHIVE
             </span>
             <h3 className="font-heading text-lg font-bold text-foreground">
               Create New Event • Step {step} of 4

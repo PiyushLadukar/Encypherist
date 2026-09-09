@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion, useSpring } from "motion/react";
-import { ArrowUpRight, ArrowUp } from "lucide-react";
+import { ArrowUpRight, ArrowUp, ChevronDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { GalleryEvent } from "@/data/gallery";
+import { DEFAULT_ACADEMIC_YEARS } from "@/data/gallery";
+import { CreateEventModal } from "./create-event-modal";
 
 const galleryEase = [0.22, 1, 0.36, 1] as const;
 const RAIL_TRACK_HEIGHT = 240;
@@ -47,6 +50,8 @@ function IndexRail({ active, total }: { active: number; total: number }) {
   const progress = total > 1 ? active / (total - 1) : 0;
   const dotY = useSpring(progress * RAIL_TRACK_HEIGHT, { stiffness: 160, damping: 26, mass: 0.5 });
   const fillScale = useSpring(progress, { stiffness: 160, damping: 26, mass: 0.5 });
+
+  if (total === 0) return null;
 
   return (
     <div className="sticky top-40 hidden w-12 shrink-0 flex-col items-center lg:flex">
@@ -201,37 +206,160 @@ function ScrollToTop() {
 }
 
 export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
-  const { active, register } = useActiveEvent(events.length);
+  const router = useRouter();
+  const reduceMotion = useReducedMotion();
+  const [modalYear, setModalYear] = useState<string | null>(null);
 
-  if (events.length === 0) {
-    return (
-      <div className="border border-dashed border-border px-6 py-14 text-center">
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Archive pending</p>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
-          Event posters and photographs will appear here as they are added to the local Gallery catalog.
-        </p>
-      </div>
-    );
+  // Initialize expanded state for academic years.
+  // 2026–27 is expanded by default when it contains events.
+  // 2025–26 is also expandable and active by default when populated.
+  const [expandedYears, setExpandedYears] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    for (const year of DEFAULT_ACADEMIC_YEARS) {
+      const yearEvents = events.filter((e) => (e.academicYear ?? "2025–26") === year);
+      if (year === "2026–27") {
+        initial[year] = yearEvents.length > 0;
+      } else {
+        initial[year] = yearEvents.length > 0;
+      }
+    }
+    return initial;
+  });
+
+  const toggleYear = (year: string) => {
+    setExpandedYears((prev) => ({
+      ...prev,
+      [year]: !prev[year],
+    }));
+  };
+
+  // Build a flat list of visible events across all currently expanded academic year sections
+  const visibleEvents: { event: GalleryEvent; globalIndex: number }[] = [];
+  let currentGlobalIndex = 0;
+
+  for (const year of DEFAULT_ACADEMIC_YEARS) {
+    const yearEvents = events.filter((e) => (e.academicYear ?? "2025–26") === year);
+    if (expandedYears[year]) {
+      for (const event of yearEvents) {
+        visibleEvents.push({ event, globalIndex: currentGlobalIndex });
+        currentGlobalIndex++;
+      }
+    }
   }
+
+  const { active, register } = useActiveEvent(visibleEvents.length);
 
   return (
     <>
       <div className="relative mx-auto flex max-w-5xl gap-8">
-        <IndexRail active={active} total={events.length} />
+        <IndexRail active={active} total={visibleEvents.length} />
 
-        <div className="flex min-w-0 flex-1 flex-col gap-6 sm:gap-7">
-          {events.map((event, index) => (
-            <EventRow
-              key={event.id}
-              event={event}
-              index={index}
-              total={events.length}
-              isActive={index === active}
-              registerNode={register(index)}
-            />
-          ))}
+        <div className="flex min-w-0 flex-1 flex-col gap-10 sm:gap-12">
+          {DEFAULT_ACADEMIC_YEARS.map((year) => {
+            const yearEvents = events.filter((e) => (e.academicYear ?? "2025–26") === year);
+            const count = yearEvents.length;
+            const countText = `${String(count).padStart(2, "0")} ${count === 1 ? "EVENT" : "EVENTS"}`;
+            const isExpanded = !!expandedYears[year];
+            const isCurrentYear = year === DEFAULT_ACADEMIC_YEARS[0];
+
+            return (
+              <section key={year} className="flex flex-col">
+                <div className="group relative flex w-full items-center justify-between gap-4 rounded-2xl border border-border/70 bg-card/60 px-6 py-5 text-left shadow-sm transition-all duration-300 hover:border-primary/40 hover:bg-card sm:px-8 sm:py-6">
+                  <button
+                    type="button"
+                    onClick={() => toggleYear(year)}
+                    aria-expanded={isExpanded}
+                    aria-controls={`year-content-${year}`}
+                    aria-label={`Toggle ${year} academic year events`}
+                    className="absolute inset-0 z-0 rounded-2xl text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                  />
+
+                  <div className="relative z-10 flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
+                    <span className="font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+                      {year}
+                    </span>
+                    {isCurrentYear && (
+                      <button
+                        type="button"
+                        onClick={() => setModalYear(year)}
+                        className="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/[0.06] px-2.5 py-1 font-mono text-xs font-semibold text-primary transition-all duration-300 hover:border-primary/60 hover:bg-primary/15 hover:shadow-xs"
+                      >
+                        <Plus className="size-3" /> Add Event
+                      </button>
+                    )}
+                    <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors group-hover:text-primary sm:text-sm">
+                      {countText}
+                    </span>
+                  </div>
+
+                  <span className="pointer-events-none relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full border border-border/70 bg-background/60 text-muted-foreground transition-all duration-300 group-hover:border-primary/40 group-hover:bg-primary/10 group-hover:text-primary">
+                    <ChevronDown
+                      className={cn(
+                        "size-5 transition-transform duration-300 ease-out",
+                        isExpanded && "rotate-180 text-primary"
+                      )}
+                    />
+                  </span>
+                </div>
+
+                <AnimatePresence initial={false}>
+                  {isExpanded && (
+                    <motion.div
+                      id={`year-content-${year}`}
+                      key={`content-${year}`}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: reduceMotion ? 0.2 : 0.4, ease: galleryEase }}
+                      className="overflow-hidden"
+                    >
+                      {count > 0 ? (
+                        <div className="flex flex-col gap-6 pt-6 sm:gap-7 sm:pt-7">
+                          {yearEvents.map((event, localIndex) => {
+                            const item = visibleEvents.find((v) => v.event.id === event.id);
+                            if (!item) return null;
+                            return (
+                              <EventRow
+                                key={event.id}
+                                event={event}
+                                index={localIndex}
+                                total={yearEvents.length}
+                                isActive={item.globalIndex === active}
+                                registerNode={register(item.globalIndex)}
+                              />
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="pt-6 sm:pt-7">
+                          <div className="rounded-xl border border-dashed border-border/70 bg-card/30 px-6 py-8 text-center">
+                            <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
+                              Archive pending
+                            </p>
+                            <p className="mt-2 text-xs text-muted-foreground/80">
+                              No events recorded for the {year} academic year yet.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </section>
+            );
+          })}
         </div>
       </div>
+
+      <CreateEventModal
+        isOpen={Boolean(modalYear)}
+        academicYear={modalYear ?? undefined}
+        onClose={() => setModalYear(null)}
+        onSuccess={() => {
+          setModalYear(null);
+          router.refresh();
+        }}
+      />
 
       <LocatorGlyph className="pointer-events-none fixed bottom-6 left-6 z-10 hidden size-5 text-muted-foreground/40 lg:block" />
       <ScrollToTop />
