@@ -36,6 +36,7 @@ export const formFieldSchema = z
     required: z.boolean().default(false),
     defaultValue: z.string().trim().max(500).optional(),
     options: z.array(z.string().trim().min(1).max(160)).max(50).optional(),
+    identity: z.enum(["name", "email", "phone", "department", "year"]).optional(),
     order: z.number().int().min(0),
   })
   .superRefine((field, ctx) => {
@@ -57,5 +58,12 @@ export const registrationFormSchema = z.object({
     .max(40)
     .refine((fields) => new Set(fields.map((f) => f.key)).size === fields.length, {
       message: "Field keys must be unique",
-    }),
+    })
+    .refine(
+      (fields) => {
+        const roles = fields.map((f) => f.identity).filter(Boolean);
+        return new Set(roles).size === roles.length;
+      },
+      { message: "Each standard field (name, email, phone, department, year) can only appear once" }
+    ),
 });

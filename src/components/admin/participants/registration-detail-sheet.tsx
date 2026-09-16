@@ -168,15 +168,17 @@ export function RegistrationDetailSheet({
             </div>
           )}
 
-          {registration.formSnapshot.length > 0 && (
+          {registration.formSnapshot.some((f) => !f.identity) && (
             <div>
               <h3 className="mb-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
                 Form responses
               </h3>
               <dl className="space-y-1.5 text-sm">
-                {registration.formSnapshot.map((field) => (
-                  <Row key={field.key} label={field.label} value={formatResponse(registration.responses[field.key])} />
-                ))}
+                {registration.formSnapshot
+                  .filter((field) => !field.identity)
+                  .map((field) => (
+                    <Row key={field.key} label={field.label} value={formatResponse(registration.responses[field.key])} />
+                  ))}
               </dl>
             </div>
           )}

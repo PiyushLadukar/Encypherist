@@ -8,6 +8,7 @@ import { logAdminAction } from "@/lib/audit";
 import { eventSchema, type EventInput } from "@/lib/validation/event";
 import { getEventById, getEventBySlugAdmin } from "@/lib/data/admin-events";
 import { saveUploadedImage, deleteUploadedFile, UploadError } from "@/lib/uploads";
+import { mergeIdentityFields } from "@/lib/registration-form";
 
 export type ActionResult<T = undefined> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -23,6 +24,8 @@ export async function createEvent(input: EventInput): Promise<ActionResult<{ id:
 
     const existing = await getEventBySlugAdmin(parsed.data.slug);
     if (existing) return fail("An event with this URL slug already exists.");
+
+    parsed.data.registrationForm.fields = mergeIdentityFields(parsed.data.registrationForm.fields);
 
     const { events } = await getCollections();
     const now = new Date();

@@ -3,6 +3,7 @@ import { getCollections } from "@/lib/mongodb";
 import { getEventBySlugAdmin } from "@/lib/data/admin-events";
 import { isRegistrationOpen } from "@/lib/event-status";
 import { buildRegistrationSchema, checkEligibility } from "@/lib/validation/registration";
+import { splitFields, deriveParticipant, hasIdentity } from "@/lib/registration-form";
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -37,24 +38,45 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
   }
   const data = parsed.data;
 
-  const responsible = data.registrationType === "team" ? data.team.leader : data.individual;
+  // Reconstruct the {name,email,phone,department,year} participant record(s)
+  // from the answers to the identity-tagged form fields.
+  const { identityFields } = splitFields(event.registrationForm.fields);
+  const individual =
+    data.registrationType === "individual" ? deriveParticipant(identityFields, data.identity) : null;
+  const team =
+    data.registrationType === "team"
+      ? {
+          teamName: data.team.teamName,
+          leader: deriveParticipant(identityFields, data.team.leader),
+          members: data.team.members.map((m: Record<string, unknown>) =>
+            deriveParticipant(identityFields, m)
+          ),
+        }
+      : null;
+
+  const responsible = team ? team.leader : individual!;
   const eligibility = checkEligibility(event, responsible);
   if (!eligibility.eligible) {
     return NextResponse.json({ error: eligibility.reason }, { status: 403 });
   }
 
   const { registrations } = await getCollections();
-  const email = responsible.email.toLowerCase();
-  const duplicate = await registrations.findOne({
-    eventId: event.id,
-    deletedAt: null,
-    $or: [{ "individual.email": email }, { "team.leader.email": email }],
-  });
-  if (duplicate) {
-    return NextResponse.json(
-      { error: "You've already registered for this event with this email." },
-      { status: 409 }
-    );
+
+  // Duplicate detection keys on email — only possible when the form still
+  // collects one.
+  if (hasIdentity(event.registrationForm.fields, "email") && responsible.email) {
+    const email = responsible.email.toLowerCase();
+    const duplicate = await registrations.findOne({
+      eventId: event.id,
+      deletedAt: null,
+      $or: [{ "individual.email": email }, { "team.leader.email": email }],
+    });
+    if (duplicate) {
+      return NextResponse.json(
+        { error: "You've already registered for this event with this email." },
+        { status: 409 }
+      );
+    }
   }
 
   const now = new Date();
@@ -66,8 +88,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     formVersion: event.registrationForm.version,
     formSnapshot: event.registrationForm.fields,
     responses: data.responses,
-    individual: data.registrationType === "individual" ? data.individual : null,
-    team: data.registrationType === "team" ? data.team : null,
+    individual,
+    team,
     submittedAt: now,
     updatedAt: now,
     updatedBy: null,

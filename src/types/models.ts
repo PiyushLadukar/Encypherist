@@ -64,6 +64,16 @@ export type FormFieldType =
   | "year"
   | "college";
 
+/**
+ * Marks one of the five standard participant fields. Seeded into every new
+ * event's form (see DEFAULT_REGISTRATION_FIELDS) but fully editable/removable
+ * by the admin afterwards. The server derives `Registration.individual` /
+ * `team.leader` / `team.members` from the answers to these tagged fields, so
+ * eligibility, dedup, filters and export keep working. At most one field per
+ * role per form.
+ */
+export type FormFieldIdentity = "name" | "email" | "phone" | "department" | "year";
+
 export type FormField = {
   key: string;
   type: FormFieldType;
@@ -74,6 +84,8 @@ export type FormField = {
   defaultValue?: string;
   /** For dropdown/radio/checkbox/multiselect. */
   options?: string[];
+  /** Set on the seeded standard fields; absent on custom admin-added fields. */
+  identity?: FormFieldIdentity;
   order: number;
 };
 

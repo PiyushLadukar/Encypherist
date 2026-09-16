@@ -13,6 +13,7 @@ import { FormBuilderSection } from "./form-builder-section";
 import { PublishSection } from "./publish-section";
 import { createEvent, updateEvent } from "@/lib/actions/events";
 import { eventSchema } from "@/lib/validation/event";
+import { defaultRegistrationFields } from "@/lib/registration-form";
 import type { Event, EligibilityConfig, RegistrationSettings, FormField, EventPublicationStatus } from "@/types/models";
 
 function toDateInput(iso: string | null): string {
@@ -56,7 +57,9 @@ export function EventForm({ initialEvent }: { initialEvent: Event | null }) {
   const [eligibility, setEligibility] = useState<EligibilityConfig>(
     initialEvent?.eligibility ?? { audience: "everyone", departments: "all", years: "all", semesters: "all" }
   );
-  const [fields, setFields] = useState<FormField[]>(initialEvent?.registrationForm.fields ?? []);
+  const [fields, setFields] = useState<FormField[]>(
+    initialEvent?.registrationForm.fields ?? defaultRegistrationFields()
+  );
 
   // PublishSection changes status via its own server action + router.refresh(),
   // which re-fetches initialEvent from the server with a new status — resync

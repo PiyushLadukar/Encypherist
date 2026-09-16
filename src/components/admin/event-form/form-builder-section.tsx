@@ -29,6 +29,18 @@ export function FormBuilderSection({
   }
 
   function remove(key: string) {
+    const field = sorted.find((f) => f.key === key);
+    if (field?.identity) {
+      const warnings: Record<string, string> = {
+        email: "Removing the Email field disables duplicate-registration checks for this event.",
+        department: "Removing the Department field means you can't filter participants by department or enforce it in eligibility.",
+        year: "Removing the Year field means you can't filter participants by year or enforce it in eligibility.",
+        name: "Removing the Name field means registrations won't have a participant name.",
+        phone: "Removing the Phone field means you won't collect participant phone numbers.",
+      };
+      const message = `${warnings[field.identity] ?? "This is a standard participant field."}\n\nRemove it anyway?`;
+      if (!window.confirm(message)) return;
+    }
     onChange(sorted.filter((f) => f.key !== key).map((f, i) => ({ ...f, order: i })));
   }
 
@@ -57,13 +69,14 @@ export function FormBuilderSection({
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-xs text-muted-foreground">
-          These questions appear in addition to the built-in name/email/phone/department/year fields collected for
-          every participant (and team leader/members, for team events).
+          This is the full registration form. The standard participant fields (name, email, phone, department, year)
+          are seeded for you and tagged <span className="font-mono">Identity</span> — reorder, relabel, make them
+          optional, or remove them like any other field. Add your own below.
         </p>
 
         {sorted.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border py-10 text-center text-sm text-muted-foreground">
-            No custom fields yet — add one above (e.g. GitHub URL, Project Idea, Upload Photograph).
+            No fields yet — add one above (e.g. Name, Email, GitHub URL, Project Idea).
           </div>
         ) : (
           <div className="space-y-2">
@@ -76,6 +89,11 @@ export function FormBuilderSection({
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="truncate text-sm font-medium text-foreground">{field.label}</span>
+                    {field.identity && (
+                      <Badge variant="secondary" className="text-[10px]">
+                        Identity
+                      </Badge>
+                    )}
                     {field.required && (
                       <Badge variant="outline" className="text-[10px]">
                         Required

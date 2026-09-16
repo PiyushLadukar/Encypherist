@@ -11,7 +11,8 @@
     "db:migrate": "tsx scripts/run-migrations.ts",
     "db:seed": "tsx scripts/seed/index.ts",
     "db:seed-admin": "tsx scripts/seed-admin.ts",
-    "db:seed-mongo-events": "tsx scripts/seed-mongo-events.ts"
+    "db:seed-mongo-events": "tsx scripts/seed-mongo-events.ts",
+    "db:migrate-forms": "tsx scripts/migrate-registration-forms.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

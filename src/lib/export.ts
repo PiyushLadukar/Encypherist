@@ -35,6 +35,9 @@ export function buildExportRows(event: Event, registrations: Registration[]): { 
   const customFieldsByKey = new Map<string, FormField>();
   for (const reg of registrations) {
     for (const field of reg.formSnapshot) {
+      // Identity fields (name/email/phone/department/year) already have their
+      // own base columns — don't repeat them as per-field columns.
+      if (field.identity) continue;
       if (!customFieldsByKey.has(field.key)) customFieldsByKey.set(field.key, field);
     }
   }

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { Event, FormField } from "@/types/models";
+import { splitFields, deriveParticipant, findIdentityField } from "@/lib/registration-form";
 
 export const participantInfoSchema = z.object({
   name: z.string().trim().min(2, "Enter a full name").max(120),
@@ -79,7 +80,7 @@ function fieldValueSchema(field: FormField): z.ZodTypeAny {
   return schema;
 }
 
-function responsesSchema(fields: FormField[]) {
+function fieldsObjectSchema(fields: FormField[]) {
   const shape: Record<string, z.ZodTypeAny> = {};
   for (const field of fields) {
     shape[field.key] = fieldValueSchema(field);
@@ -89,12 +90,21 @@ function responsesSchema(fields: FormField[]) {
 
 /**
  * Builds the full submission schema for an event from its live configuration
- * (registration mode, team size bounds, custom fields). Used by both the
- * public form component and the API route, so client/server validation can
- * never drift out of sync.
+ * (registration mode, team size bounds, form fields). Used by both the public
+ * form component and the API route, so client/server validation can never
+ * drift out of sync.
+ *
+ * Payload shape:
+ *  - individual: { registrationType, identity: {<identity field keys>}, responses: {<custom field keys>} }
+ *  - team:       { registrationType, team: { teamName, leader, members: [] }, responses }
+ *    where leader/members carry only the identity field keys.
  */
 export function buildRegistrationSchema(event: Pick<Event, "registration" | "registrationForm">) {
-  const responses = responsesSchema(event.registrationForm.fields);
+  const { identityFields, customFields } = splitFields(event.registrationForm.fields);
+  const identity = fieldsObjectSchema(identityFields);
+  const responses = fieldsObjectSchema(customFields);
+  const emailField = findIdentityField(event.registrationForm.fields, "email");
+
   const allowedModes =
     event.registration.type === "both" ? (["individual", "team"] as const) : ([event.registration.type] as const);
 
@@ -106,36 +116,46 @@ export function buildRegistrationSchema(event: Pick<Event, "registration" | "reg
   return base
     .and(
       z.union([
-        z.object({ registrationType: z.literal("individual"), individual: participantInfoSchema, team: z.undefined().optional() }),
+        z.object({
+          registrationType: z.literal("individual"),
+          identity,
+          team: z.undefined().optional(),
+        }),
         z.object({
           registrationType: z.literal("team"),
           team: z.object({
             teamName: z.string().trim().min(2, "Enter a team name").max(120),
-            leader: participantInfoSchema,
-            members: z.array(participantInfoSchema).max(50),
+            leader: identity,
+            members: z.array(identity).max(50),
           }),
-          individual: z.undefined().optional(),
+          identity: z.undefined().optional(),
         }),
       ])
     )
     .superRefine((val, ctx) => {
       if (val.registrationType !== "team") return;
       const teamSize = event.registration.teamSize;
-      if (!teamSize) return;
-      const total = 1 + val.team.members.length;
-      if (total < teamSize.min || total > teamSize.max) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["team", "members"],
-          message:
-            teamSize.min === teamSize.max
-              ? `Team must have exactly ${teamSize.min} member${teamSize.min === 1 ? "" : "s"} (including the leader)`
-              : `Team size must be between ${teamSize.min} and ${teamSize.max} members (including the leader)`,
-        });
+      if (teamSize) {
+        const total = 1 + val.team.members.length;
+        if (total < teamSize.min || total > teamSize.max) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["team", "members"],
+            message:
+              teamSize.min === teamSize.max
+                ? `Team must have exactly ${teamSize.min} member${teamSize.min === 1 ? "" : "s"} (including the leader)`
+                : `Team size must be between ${teamSize.min} and ${teamSize.max} members (including the leader)`,
+          });
+        }
       }
-      const emails = [val.team.leader.email, ...val.team.members.map((m) => m.email)];
-      if (new Set(emails.map((e) => e.toLowerCase())).size !== emails.length) {
-        ctx.addIssue({ code: "custom", path: ["team", "members"], message: "Team members must have unique emails" });
+      if (emailField) {
+        const emails = [
+          val.team.leader[emailField.key],
+          ...val.team.members.map((m: Record<string, unknown>) => m[emailField.key]),
+        ].map((e) => String(e ?? "").toLowerCase());
+        if (new Set(emails).size !== emails.length) {
+          ctx.addIssue({ code: "custom", path: ["team", "members"], message: "Team members must have unique emails" });
+        }
       }
     });
 }
@@ -145,18 +165,27 @@ export type EligibilityCheckResult = { eligible: true } | { eligible: false; rea
 /**
  * Server-side (and reused client-side for instant feedback) eligibility gate.
  * Evaluated against the registrant responsible for the submission: the
- * individual applicant, or the team leader for team registrations.
+ * individual applicant, or the team leader for team registrations. An
+ * eligibility axis is only enforced when the form still collects the field it
+ * needs — if the admin removed the Department or Year field, that axis is skipped.
  */
 export function checkEligibility(
-  event: Pick<Event, "eligibility">,
+  event: Pick<Event, "eligibility" | "registrationForm">,
   participant: Pick<ParticipantInfoInput, "department" | "year">
 ): EligibilityCheckResult {
   const { departments, years } = event.eligibility;
-  if (departments !== "all" && !departments.includes(participant.department)) {
+  const { identityFields } = splitFields(event.registrationForm.fields);
+  const collectsDepartment = identityFields.some((f) => f.identity === "department");
+  const collectsYear = identityFields.some((f) => f.identity === "year");
+
+  if (collectsDepartment && departments !== "all" && !departments.includes(participant.department)) {
     return { eligible: false, reason: "This event isn't open to your department." };
   }
-  if (years !== "all" && !years.includes(participant.year)) {
+  if (collectsYear && years !== "all" && !years.includes(participant.year)) {
     return { eligible: false, reason: "This event isn't open to your academic year." };
   }
   return { eligible: true };
 }
+
+/** Re-export for consumers that build the participant record from a submission. */
+export { deriveParticipant };

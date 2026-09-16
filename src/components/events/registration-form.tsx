@@ -16,15 +16,15 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { SUGGESTED_DEPARTMENTS, ACADEMIC_YEARS } from "@/lib/constants/academic";
-import { buildRegistrationSchema, type ParticipantInfoInput } from "@/lib/validation/registration";
+import { buildRegistrationSchema } from "@/lib/validation/registration";
+import { splitFields, findIdentityField } from "@/lib/registration-form";
 import type { RegistrationSettings, RegistrationForm as RegistrationFormConfig, FormField } from "@/types/models";
 import type { ZodIssue } from "zod";
-
-const EMPTY_PARTICIPANT: ParticipantInfoInput = { name: "", email: "", phone: "", department: "", year: "" };
 
 type Status = "idle" | "submitting" | "success" | "error";
 type Mode = "individual" | "team";
 type ErrorMap = Record<string, string>;
+type ResponseMap = Record<string, unknown>;
 
 function issuesToErrorMap(issues: ZodIssue[]): ErrorMap {
   const map: ErrorMap = {};
@@ -33,6 +33,16 @@ function issuesToErrorMap(issues: ZodIssue[]): ErrorMap {
     if (!(key in map)) map[key] = issue.message;
   }
   return map;
+}
+
+function emptyResponses(fields: FormField[]): ResponseMap {
+  const initial: ResponseMap = {};
+  for (const field of fields) {
+    if (field.type === "checkbox") initial[field.key] = false;
+    else if (field.type === "multiselect") initial[field.key] = [];
+    else initial[field.key] = field.defaultValue ?? "";
+  }
+  return initial;
 }
 
 export function RegistrationForm({
@@ -46,37 +56,38 @@ export function RegistrationForm({
   registrationConfig: RegistrationSettings;
   registrationForm: RegistrationFormConfig;
 }) {
+  const { identityFields, customFields } = splitFields(registrationForm.fields);
+  const allFields = [...registrationForm.fields].sort((a, b) => a.order - b.order);
+  const nameKey = findIdentityField(registrationForm.fields, "name")?.key;
+  const emailKey = findIdentityField(registrationForm.fields, "email")?.key;
+
   const availableModes: Mode[] =
     registrationConfig.type === "both" ? ["individual", "team"] : [registrationConfig.type];
 
   const [mode, setMode] = useState<Mode>(availableModes[0]);
-  const [individual, setIndividual] = useState<ParticipantInfoInput>(EMPTY_PARTICIPANT);
+  // Individual mode: one map covering every field. Team mode: identity fields
+  // are answered per person (leader + members); custom fields once for the team.
+  const [individual, setIndividual] = useState<ResponseMap>(() => emptyResponses(allFields));
   const [teamName, setTeamName] = useState("");
-  const [leader, setLeader] = useState<ParticipantInfoInput>(EMPTY_PARTICIPANT);
-  const [members, setMembers] = useState<ParticipantInfoInput[]>(
-    Array.from({ length: Math.max((registrationConfig.teamSize?.min ?? 2) - 1, 1) }, () => ({ ...EMPTY_PARTICIPANT }))
+  const [leader, setLeader] = useState<ResponseMap>(() => emptyResponses(identityFields));
+  const [members, setMembers] = useState<ResponseMap[]>(() =>
+    Array.from({ length: Math.max((registrationConfig.teamSize?.min ?? 2) - 1, 1) }, () =>
+      emptyResponses(identityFields)
+    )
   );
-  const [responses, setResponses] = useState<Record<string, unknown>>(() => {
-    const initial: Record<string, unknown> = {};
-    for (const field of registrationForm.fields) {
-      if (field.type === "checkbox") initial[field.key] = false;
-      else if (field.type === "multiselect") initial[field.key] = [];
-      else initial[field.key] = field.defaultValue ?? "";
-    }
-    return initial;
-  });
+  const [teamResponses, setTeamResponses] = useState<ResponseMap>(() => emptyResponses(customFields));
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [errors, setErrors] = useState<ErrorMap>({});
   const [status, setStatus] = useState<Status>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const fields = [...registrationForm.fields].sort((a, b) => a.order - b.order);
   const teamSize = registrationConfig.teamSize;
   const canAddMember = !teamSize || 1 + members.length < teamSize.max;
 
-  async function handleFileSelect(field: FormField, file: File | null) {
+  async function handleFileSelect(field: FormField, file: File | null, scopeKey: string) {
     if (!file) return;
-    setUploading((u) => ({ ...u, [field.key]: true }));
+    const uploadKey = `${scopeKey}:${field.key}`;
+    setUploading((u) => ({ ...u, [uploadKey]: true }));
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -86,7 +97,8 @@ export function RegistrationForm({
         setErrors((e) => ({ ...e, [`responses.${field.key}`]: data.error ?? "Upload failed." }));
         return;
       }
-      setResponses((r) => ({ ...r, [field.key]: data.url }));
+      setTeamResponses((r) => ({ ...r, [field.key]: data.url }));
+      setIndividual((r) => ({ ...r, [field.key]: data.url }));
       setErrors((e) => {
         const next = { ...e };
         delete next[`responses.${field.key}`];
@@ -95,8 +107,23 @@ export function RegistrationForm({
     } catch {
       setErrors((e) => ({ ...e, [`responses.${field.key}`]: "Network error uploading file." }));
     } finally {
-      setUploading((u) => ({ ...u, [field.key]: false }));
+      setUploading((u) => ({ ...u, [uploadKey]: false }));
     }
+  }
+
+  function buildPayload() {
+    if (mode === "individual") {
+      const identity: ResponseMap = {};
+      const responses: ResponseMap = {};
+      for (const field of identityFields) identity[field.key] = individual[field.key];
+      for (const field of customFields) responses[field.key] = individual[field.key];
+      return { registrationType: "individual" as const, identity, responses };
+    }
+    return {
+      registrationType: "team" as const,
+      team: { teamName, leader, members },
+      responses: teamResponses,
+    };
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -104,11 +131,7 @@ export function RegistrationForm({
     setErrorMessage(null);
     setErrors({});
 
-    const payload =
-      mode === "individual"
-        ? { registrationType: "individual" as const, individual, responses }
-        : { registrationType: "team" as const, team: { teamName, leader, members }, responses };
-
+    const payload = buildPayload();
     const schema = buildRegistrationSchema({ registration: registrationConfig, registrationForm });
     const parsed = schema.safeParse(payload);
     if (!parsed.success) {
@@ -140,8 +163,16 @@ export function RegistrationForm({
   }
 
   if (status === "success") {
-    const displayName = mode === "team" ? teamName : individual.name;
-    const displayEmail = mode === "team" ? leader.email : individual.email;
+    const displayName =
+      mode === "team" ? teamName : nameKey ? String(individual[nameKey] ?? "") : eventTitle;
+    const displayEmail =
+      mode === "team"
+        ? emailKey
+          ? String(leader[emailKey] ?? "")
+          : ""
+        : emailKey
+          ? String(individual[emailKey] ?? "")
+          : "";
     return (
       <div className="corner-brackets border border-verified/30 bg-verified/5 px-6 py-10 text-center sm:px-10 sm:py-14">
         <CheckCircle2 className="mx-auto size-9 text-verified" />
@@ -154,14 +185,18 @@ export function RegistrationForm({
             <dt className="text-muted-foreground">EVENT //</dt>
             <dd className="truncate text-foreground">{eventTitle}</dd>
           </div>
-          <div className="flex items-center justify-between gap-4">
-            <dt className="text-muted-foreground">{mode === "team" ? "TEAM //" : "NAME //"}</dt>
-            <dd className="truncate text-foreground">{displayName}</dd>
-          </div>
-          <div className="flex items-center justify-between gap-4">
-            <dt className="text-muted-foreground">EMAIL //</dt>
-            <dd className="truncate text-foreground">{displayEmail}</dd>
-          </div>
+          {displayName && (
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-muted-foreground">{mode === "team" ? "TEAM //" : "NAME //"}</dt>
+              <dd className="truncate text-foreground">{displayName}</dd>
+            </div>
+          )}
+          {displayEmail && (
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-muted-foreground">EMAIL //</dt>
+              <dd className="truncate text-foreground">{displayEmail}</dd>
+            </div>
+          )}
           <div className="flex items-center justify-between gap-4">
             <dt className="text-muted-foreground">STATUS //</dt>
             <dd className="text-verified">PENDING REVIEW</dd>
@@ -172,6 +207,30 @@ export function RegistrationForm({
         </p>
       </div>
     );
+  }
+
+  function renderFieldList(
+    list: FormField[],
+    values: ResponseMap,
+    setValues: (updater: (prev: ResponseMap) => ResponseMap) => void,
+    errorPrefix: string | ((field: FormField) => string),
+    scopeKey: string
+  ) {
+    return list.map((field) => {
+      const prefix = typeof errorPrefix === "function" ? errorPrefix(field) : errorPrefix;
+      return (
+        <DynamicField
+          key={`${scopeKey}:${field.key}`}
+          field={field}
+          idPrefix={scopeKey}
+          value={values[field.key]}
+          onChange={(v) => setValues((r) => ({ ...r, [field.key]: v }))}
+          onFileSelect={(file) => handleFileSelect(field, file, scopeKey)}
+          uploading={Boolean(uploading[`${scopeKey}:${field.key}`])}
+          error={errors[`${prefix}.${field.key}`]}
+        />
+      );
+    });
   }
 
   return (
@@ -197,13 +256,15 @@ export function RegistrationForm({
       )}
 
       {mode === "individual" ? (
-        <ParticipantFields
-          idPrefix="individual"
-          values={individual}
-          onChange={setIndividual}
-          errors={errors}
-          errorPrefix="individual"
-        />
+        <div className="space-y-5">
+          {renderFieldList(
+            allFields,
+            individual,
+            setIndividual,
+            (field) => (field.identity ? "identity" : "responses"),
+            "individual"
+          )}
+        </div>
       ) : (
         <div className="space-y-8">
           <div>
@@ -222,14 +283,8 @@ export function RegistrationForm({
 
           <div>
             <h3 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">Team leader</h3>
-            <div className="mt-4">
-              <ParticipantFields
-                idPrefix="leader"
-                values={leader}
-                onChange={setLeader}
-                errors={errors}
-                errorPrefix="team.leader"
-              />
+            <div className="mt-4 space-y-5">
+              {renderFieldList(identityFields, leader, setLeader, "team.leader", "leader")}
             </div>
           </div>
 
@@ -243,7 +298,7 @@ export function RegistrationForm({
                 variant="outline"
                 size="sm"
                 disabled={!canAddMember}
-                onClick={() => setMembers((m) => [...m, { ...EMPTY_PARTICIPANT }])}
+                onClick={() => setMembers((m) => [...m, emptyResponses(identityFields)])}
               >
                 <Plus className="size-3.5" />
                 Add member
@@ -265,36 +320,27 @@ export function RegistrationForm({
                       <Trash2 className="size-3.5" />
                     </button>
                   </div>
-                  <div className="mt-3">
-                    <ParticipantFields
-                      idPrefix={`member_${i}`}
-                      values={member}
-                      onChange={(v) => setMembers((m) => m.map((mm, idx) => (idx === i ? v : mm)))}
-                      errors={errors}
-                      errorPrefix={`team.members.${i}`}
-                    />
+                  <div className="mt-3 space-y-5">
+                    {renderFieldList(
+                      identityFields,
+                      member,
+                      (updater) =>
+                        setMembers((m) => m.map((mm, idx) => (idx === i ? updater(mm) : mm))),
+                      `team.members.${i}`,
+                      `member_${i}`
+                    )}
                   </div>
                 </div>
               ))}
             </div>
             {errors["team.members"] && <p className="mt-3 text-xs text-destructive">{errors["team.members"]}</p>}
           </div>
-        </div>
-      )}
 
-      {fields.length > 0 && (
-        <div className="space-y-5 border-t border-border pt-6">
-          {fields.map((field) => (
-            <DynamicField
-              key={field.key}
-              field={field}
-              value={responses[field.key]}
-              onChange={(v) => setResponses((r) => ({ ...r, [field.key]: v }))}
-              onFileSelect={(file) => handleFileSelect(field, file)}
-              uploading={Boolean(uploading[field.key])}
-              error={errors[`responses.${field.key}`]}
-            />
-          ))}
+          {customFields.length > 0 && (
+            <div className="space-y-5 border-t border-border pt-6">
+              {renderFieldList(customFields, teamResponses, setTeamResponses, "responses", "team")}
+            </div>
+          )}
         </div>
       )}
 
@@ -323,97 +369,9 @@ export function RegistrationForm({
   );
 }
 
-function ParticipantFields({
-  idPrefix,
-  values,
-  onChange,
-  errors,
-  errorPrefix,
-}: {
-  idPrefix: string;
-  values: ParticipantInfoInput;
-  onChange: (values: ParticipantInfoInput) => void;
-  errors: ErrorMap;
-  errorPrefix: string;
-}) {
-  function set<K extends keyof ParticipantInfoInput>(key: K, value: ParticipantInfoInput[K]) {
-    onChange({ ...values, [key]: value });
-  }
-
-  return (
-    <div className="space-y-4">
-      <Field
-        id={`${idPrefix}_name`}
-        label="Full name"
-        value={values.name}
-        onChange={(v) => set("name", v)}
-        error={errors[`${errorPrefix}.name`]}
-        autoComplete="name"
-      />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field
-          id={`${idPrefix}_email`}
-          label="Email"
-          type="email"
-          value={values.email}
-          onChange={(v) => set("email", v)}
-          error={errors[`${errorPrefix}.email`]}
-          autoComplete="email"
-        />
-        <Field
-          id={`${idPrefix}_phone`}
-          label="Phone"
-          type="tel"
-          value={values.phone}
-          onChange={(v) => set("phone", v)}
-          error={errors[`${errorPrefix}.phone`]}
-          autoComplete="tel"
-        />
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <Label htmlFor={`${idPrefix}_department`}>Department</Label>
-          <Select value={values.department || undefined} onValueChange={(v) => set("department", v ?? "")}>
-            <SelectTrigger id={`${idPrefix}_department`} className="mt-1.5 w-full">
-              <SelectValue placeholder="Select department" />
-            </SelectTrigger>
-            <SelectContent>
-              {SUGGESTED_DEPARTMENTS.map((d) => (
-                <SelectItem key={d} value={d}>
-                  {d}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors[`${errorPrefix}.department`] && (
-            <p className="mt-1.5 text-xs text-destructive">{errors[`${errorPrefix}.department`]}</p>
-          )}
-        </div>
-        <div>
-          <Label htmlFor={`${idPrefix}_year`}>Year</Label>
-          <Select value={values.year || undefined} onValueChange={(v) => set("year", v ?? "")}>
-            <SelectTrigger id={`${idPrefix}_year`} className="mt-1.5 w-full">
-              <SelectValue placeholder="Select year" />
-            </SelectTrigger>
-            <SelectContent>
-              {ACADEMIC_YEARS.map((y) => (
-                <SelectItem key={y} value={y}>
-                  {y}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors[`${errorPrefix}.year`] && (
-            <p className="mt-1.5 text-xs text-destructive">{errors[`${errorPrefix}.year`]}</p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function DynamicField({
   field,
+  idPrefix,
   value,
   onChange,
   onFileSelect,
@@ -421,13 +379,14 @@ function DynamicField({
   error,
 }: {
   field: FormField;
+  idPrefix: string;
   value: unknown;
   onChange: (value: unknown) => void;
   onFileSelect: (file: File | null) => void;
   uploading: boolean;
   error?: string;
 }) {
-  const id = `field_${field.key}`;
+  const id = `${idPrefix}_${field.key}`;
   const labelNode = (
     <Label htmlFor={id}>
       {field.label}
