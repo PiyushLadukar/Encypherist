@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import { galleryEvents } from "@/data/gallery";
+import { galleryEvents, DEFAULT_ACADEMIC_YEARS } from "@/data/gallery";
+
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB per file
 
 function slugify(text: string): string {
   return text
@@ -12,6 +22,14 @@ function slugify(text: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+function getExt(file: File, fallback = ".jpg"): string {
+  const ext = path.extname(file.name).toLowerCase();
+  if (ext && [".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif"].includes(ext)) {
+    return ext;
+  }
+  return fallback;
+}
+
 export async function POST(request: Request) {
   let createdDir: string | null = null;
 
@@ -19,6 +37,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const title = formData.get("title")?.toString().trim();
     const description = formData.get("description")?.toString().trim() || "";
+    const rawAcademicYear = formData.get("academicYear")?.toString().trim();
     const posterFile = formData.get("poster") as File | null;
     const photoFiles = formData.getAll("photos") as File[];
 
@@ -52,22 +71,56 @@ export async function POST(request: Request) {
       // Directory does not exist, safe to proceed
     }
 
-    if (!posterFile) {
+    if (!rawAcademicYear || !DEFAULT_ACADEMIC_YEARS.includes(rawAcademicYear)) {
+      return NextResponse.json({ error: "Invalid academic year." }, { status: 400 });
+    }
+    const academicYear = rawAcademicYear;
+
+    if (!posterFile || !(posterFile instanceof File) || posterFile.size === 0) {
       return NextResponse.json({ error: "Card poster image is required." }, { status: 400 });
+    }
+
+    if (posterFile.size > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "Poster file size exceeds 10MB limit." }, { status: 400 });
+    }
+
+    if (
+      posterFile.type &&
+      !ALLOWED_MIME_TYPES.includes(posterFile.type.toLowerCase()) &&
+      !posterFile.type.startsWith("image/")
+    ) {
+      return NextResponse.json({ error: "Poster file must be a valid image." }, { status: 400 });
     }
 
     if (!photoFiles || photoFiles.length === 0) {
       return NextResponse.json({ error: "At least one photograph is required." }, { status: 400 });
     }
 
+    for (const photo of photoFiles) {
+      if (!(photo instanceof File) || photo.size === 0) {
+        return NextResponse.json({ error: "Invalid photo file uploaded." }, { status: 400 });
+      }
+      if (photo.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: `Photo "${photo.name}" exceeds 10MB size limit.` },
+          { status: 400 }
+        );
+      }
+      if (
+        photo.type &&
+        !ALLOWED_MIME_TYPES.includes(photo.type.toLowerCase()) &&
+        !photo.type.startsWith("image/")
+      ) {
+        return NextResponse.json(
+          { error: `Photo "${photo.name}" must be a valid image.` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Create target directory
     await fs.mkdir(galleryDir, { recursive: true });
     createdDir = galleryDir;
-
-    const getExt = (file: File, fallback: string) => {
-      const ext = path.extname(file.name).toLowerCase();
-      return ext || fallback;
-    };
 
     // Save poster image
     const posterExt = getExt(posterFile, ".jpg");
@@ -78,16 +131,17 @@ export async function POST(request: Request) {
 
     // Save photos sequentially (photo-1.jpg, photo-2.jpg, ...)
     const photoPaths: string[] = [];
-    const photoExt = photoFiles.length > 0 ? getExt(photoFiles[0], ".jpg") : ".jpg";
+    const photoExts: string[] = [];
 
     for (let i = 0; i < photoFiles.length; i++) {
       const photoFile = photoFiles[i];
-      const ext = getExt(photoFile, photoExt);
+      const ext = getExt(photoFile, ".jpg");
       const fileName = `photo-${i + 1}${ext}`;
       const photoPath = path.join(galleryDir, fileName);
       const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
       await fs.writeFile(photoPath, photoBuffer);
       photoPaths.push(`/gallery/${eventId}/${fileName}`);
+      photoExts.push(ext);
     }
 
     const posterRelPath = `/gallery/${eventId}/${posterFileName}`;
@@ -97,12 +151,18 @@ export async function POST(request: Request) {
     let galleryTsContent = await fs.readFile(galleryTsPath, "utf-8");
 
     const descriptionLine = description ? `\n    description: ${JSON.stringify(description)},` : "";
+    const allSameExt = photoExts.every((e) => e === photoExts[0]);
+
+    const imagesCode = allSameExt
+      ? `Array.from({ length: ${photoFiles.length} }, (_, index) => \`/gallery/${eventId}/photo-\${index + 1}${photoExts[0]}\`)`
+      : JSON.stringify(photoPaths);
+
     const newEventEntry = `  {
     id: ${JSON.stringify(eventId)},
     title: ${JSON.stringify(title)},${descriptionLine}
     poster: ${JSON.stringify(posterRelPath)},
-    images: Array.from({ length: ${photoFiles.length} }, (_, index) => \`/gallery/${eventId}/photo-\${index + 1}${photoExt}\`),
-    academicYear: "2026–27",
+    images: ${imagesCode},
+    academicYear: ${JSON.stringify(academicYear)},
   },`;
 
     const lastBracketIndex = galleryTsContent.lastIndexOf("];");
@@ -126,7 +186,7 @@ export async function POST(request: Request) {
         description,
         poster: posterRelPath,
         images: photoPaths,
-        academicYear: "2026–27",
+        academicYear,
       },
     });
   } catch (error: any) {
