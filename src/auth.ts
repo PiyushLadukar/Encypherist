@@ -26,6 +26,11 @@ declare module "@auth/core/jwt" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Auth.js only auto-trusts the request host on Vercel; on any other host a
+  // production build rejects every /api/auth/* call with UntrustedHost (dev
+  // mode hides this). Safe here because the only provider is Credentials —
+  // there is no OAuth callback URL a spoofed Host header could poison.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/admin/login" },
   providers: [
