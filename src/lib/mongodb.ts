@@ -40,6 +40,7 @@ export async function getCollections() {
   return {
     admins: db.collection("admins"),
     events: db.collection("events"),
+    galleryEvents: db.collection("gallery_events"),
     registrations: db.collection("registrations"),
     auditLog: db.collection("admin_audit_log"),
   };

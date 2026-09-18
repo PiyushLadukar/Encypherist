@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
-import { galleryEvents, DEFAULT_ACADEMIC_YEARS } from "@/data/gallery";
+import { revalidatePath } from "next/cache";
+import { AdminAuthError, requireAdminApi } from "@/lib/admin-guard";
+import { DEFAULT_ACADEMIC_YEARS } from "@/data/gallery";
+import { galleryEventExists, insertGalleryEvent } from "@/lib/data/gallery-events";
 
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
@@ -30,10 +33,27 @@ function getExt(file: File, fallback = ".jpg"): string {
   return fallback;
 }
 
+/**
+ * Creates a Gallery album: photographs land in public/gallery/<id>/ and the
+ * album record goes to MongoDB.
+ *
+ * This used to append the album to src/data/gallery.ts. That only ever worked
+ * under `next dev` — a production build serves compiled output and never
+ * re-reads its source, so the album silently never appeared. The record lives
+ * in the database now; see lib/data/gallery-events.ts.
+ *
+ * Note the photographs themselves still need a writable, persistent public/
+ * directory. That holds on a normal server or VPS, but not on a serverless
+ * host, where the filesystem is read-only and per-request.
+ */
 export async function POST(request: Request) {
   let createdDir: string | null = null;
 
   try {
+    // The authorization boundary. Without this the endpoint accepted uploads
+    // from anyone who could find it.
+    await requireAdminApi();
+
     const formData = await request.formData();
     const title = formData.get("title")?.toString().trim();
     const description = formData.get("description")?.toString().trim() || "";
@@ -50,8 +70,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid event title." }, { status: 400 });
     }
 
-    // Check if event ID already exists in catalog
-    if (galleryEvents.some((e) => e.id === eventId)) {
+    if (await galleryEventExists(eventId)) {
       return NextResponse.json(
         { error: `An event with ID "${eventId}" already exists.` },
         { status: 400 }
@@ -60,7 +79,6 @@ export async function POST(request: Request) {
 
     const galleryDir = path.join(process.cwd(), "public", "gallery", eventId);
 
-    // Check if folder already exists on disk
     try {
       await fs.access(galleryDir);
       return NextResponse.json(
@@ -118,79 +136,42 @@ export async function POST(request: Request) {
       }
     }
 
-    // Create target directory
     await fs.mkdir(galleryDir, { recursive: true });
     createdDir = galleryDir;
 
-    // Save poster image
     const posterExt = getExt(posterFile, ".jpg");
     const posterFileName = `poster${posterExt}`;
-    const posterPath = path.join(galleryDir, posterFileName);
     const posterBuffer = Buffer.from(await posterFile.arrayBuffer());
-    await fs.writeFile(posterPath, posterBuffer);
+    await fs.writeFile(path.join(galleryDir, posterFileName), posterBuffer);
 
-    // Save photos sequentially (photo-1.jpg, photo-2.jpg, ...)
     const photoPaths: string[] = [];
-    const photoExts: string[] = [];
-
     for (let i = 0; i < photoFiles.length; i++) {
       const photoFile = photoFiles[i];
-      const ext = getExt(photoFile, ".jpg");
-      const fileName = `photo-${i + 1}${ext}`;
-      const photoPath = path.join(galleryDir, fileName);
+      const fileName = `photo-${i + 1}${getExt(photoFile, ".jpg")}`;
       const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
-      await fs.writeFile(photoPath, photoBuffer);
+      await fs.writeFile(path.join(galleryDir, fileName), photoBuffer);
       photoPaths.push(`/gallery/${eventId}/${fileName}`);
-      photoExts.push(ext);
     }
 
-    const posterRelPath = `/gallery/${eventId}/${posterFileName}`;
+    const event = {
+      id: eventId,
+      title,
+      description: description || undefined,
+      poster: `/gallery/${eventId}/${posterFileName}`,
+      images: photoPaths,
+      academicYear,
+    };
 
-    // Read and update src/data/gallery.ts
-    const galleryTsPath = path.join(process.cwd(), "src", "data", "gallery.ts");
-    let galleryTsContent = await fs.readFile(galleryTsPath, "utf-8");
+    await insertGalleryEvent(event);
 
-    const descriptionLine = description ? `\n    description: ${JSON.stringify(description)},` : "";
-    const allSameExt = photoExts.every((e) => e === photoExts[0]);
+    // The public Gallery is cached — without this the new album would not show
+    // until the cache happened to expire.
+    revalidatePath("/gallery");
+    revalidatePath(`/gallery/${eventId}`);
+    revalidatePath("/admin/gallery");
 
-    const imagesCode = allSameExt
-      ? `Array.from({ length: ${photoFiles.length} }, (_, index) => \`/gallery/${eventId}/photo-\${index + 1}${photoExts[0]}\`)`
-      : JSON.stringify(photoPaths);
-
-    const newEventEntry = `  {
-    id: ${JSON.stringify(eventId)},
-    title: ${JSON.stringify(title)},${descriptionLine}
-    poster: ${JSON.stringify(posterRelPath)},
-    images: ${imagesCode},
-    academicYear: ${JSON.stringify(academicYear)},
-  },`;
-
-    const lastBracketIndex = galleryTsContent.lastIndexOf("];");
-    if (lastBracketIndex === -1) {
-      throw new Error("Could not find galleryEvents array in src/data/gallery.ts");
-    }
-
-    galleryTsContent =
-      galleryTsContent.slice(0, lastBracketIndex) +
-      newEventEntry +
-      "\n" +
-      galleryTsContent.slice(lastBracketIndex);
-
-    await fs.writeFile(galleryTsPath, galleryTsContent, "utf-8");
-
-    return NextResponse.json({
-      success: true,
-      event: {
-        id: eventId,
-        title,
-        description,
-        poster: posterRelPath,
-        images: photoPaths,
-        academicYear,
-      },
-    });
-  } catch (error: any) {
-    // Clean up created directory on failure to avoid leaving partial data
+    return NextResponse.json({ success: true, event });
+  } catch (error) {
     if (createdDir) {
       try {
         await fs.rm(createdDir, { recursive: true, force: true });
@@ -198,10 +179,13 @@ export async function POST(request: Request) {
         console.error("Directory cleanup failed:", cleanupErr);
       }
     }
+
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+
     console.error("Gallery event creation failed:", error);
-    return NextResponse.json(
-      { error: error?.message || "Failed to create gallery event." },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Failed to create gallery event.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

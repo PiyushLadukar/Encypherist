@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   LogOut,
   PlusCircle,
+  Images,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Admin } from "@/types/models";
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/events", label: "Events", icon: CalendarDays, exact: false },
   { href: "/admin/events/archived", label: "Archived Events", icon: Archive, exact: false },
+  { href: "/admin/gallery", label: "Gallery", icon: Images, exact: false },
 ] as const;
 
 export function AdminSidebar({ admin }: { admin: Admin }) {

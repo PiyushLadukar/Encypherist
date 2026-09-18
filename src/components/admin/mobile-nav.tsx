@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "Overview" },
   { href: "/admin/events", label: "Events" },
   { href: "/admin/events/archived", label: "Archived Events" },
+  { href: "/admin/gallery", label: "Gallery" },
 ] as const;
 
 export function AdminMobileNav({ admin }: { admin: Admin }) {

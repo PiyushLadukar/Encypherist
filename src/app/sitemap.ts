@@ -1,14 +1,15 @@
 import type { MetadataRoute } from "next";
 import { getPublishedEvents } from "@/lib/data/events";
 import { getPublishedMembers } from "@/lib/data/members";
-import { galleryEvents } from "@/data/gallery";
+import { getGalleryEvents } from "@/lib/data/gallery-events";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [events, members] = await Promise.all([
+  const [events, members, galleryEvents] = await Promise.all([
     getPublishedEvents().catch(() => []),
     getPublishedMembers().catch(() => []),
+    getGalleryEvents().catch(() => []),
   ]);
 
   const staticRoutes: MetadataRoute.Sitemap = [

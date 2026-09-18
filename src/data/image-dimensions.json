@@ -1,0 +1,694 @@
+{
+  "/gallery/cyber-security-talk/photo-1.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/cyber-security-talk/photo-2.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/cyber-security-talk/photo-3.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/cyber-security-talk/photo-4.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/cyber-security-talk/photo-5.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/cyber-security-talk/photo-6.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/cyber-security-talk/poster.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/disha/photo-1.jpg": {
+    "width": 2400,
+    "height": 1350
+  },
+  "/gallery/disha/photo-2.jpg": {
+    "width": 1350,
+    "height": 2400
+  },
+  "/gallery/disha/photo-3.jpg": {
+    "width": 1350,
+    "height": 2400
+  },
+  "/gallery/disha/photo-4.jpg": {
+    "width": 2400,
+    "height": 1807
+  },
+  "/gallery/disha/photo-5.jpg": {
+    "width": 1807,
+    "height": 2400
+  },
+  "/gallery/disha/photo-6.jpg": {
+    "width": 1807,
+    "height": 2400
+  },
+  "/gallery/disha/poster.jpg": {
+    "width": 2400,
+    "height": 1350
+  },
+  "/gallery/donation-drive/photo-1.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/donation-drive/photo-2.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/donation-drive/photo-3.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/donation-drive/photo-4.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/donation-drive/photo-5.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/donation-drive/photo-6.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/donation-drive/photo-7.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/donation-drive/poster.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/funfinity/photo-1.jpg": {
+    "width": 2400,
+    "height": 1350
+  },
+  "/gallery/funfinity/photo-2.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/funfinity/photo-3.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/funfinity/photo-4.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/funfinity/photo-5.jpg": {
+    "width": 2400,
+    "height": 1807
+  },
+  "/gallery/funfinity/poster.jpeg": {
+    "width": 1024,
+    "height": 468
+  },
+  "/gallery/ganesh-utsav/photo-1.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/ganesh-utsav/photo-10.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/ganesh-utsav/photo-2.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/ganesh-utsav/photo-3.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/ganesh-utsav/photo-4.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/ganesh-utsav/photo-5.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/ganesh-utsav/photo-6.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/ganesh-utsav/photo-7.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/ganesh-utsav/photo-8.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/ganesh-utsav/photo-9.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/ganesh-utsav/poster.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/gen-ai/photo-1.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/gen-ai/photo-2.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/gen-ai/photo-3.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/gen-ai/photo-4.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/gen-ai/photo-5.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/gen-ai/photo-6.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/gen-ai/photo-7.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/gen-ai/poster.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/installation/photo-1.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/installation/photo-2.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/installation/photo-3.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/installation/photo-4.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/installation/photo-5.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/installation/photo-6.jpg": {
+    "width": 1280,
+    "height": 960
+  },
+  "/gallery/installation/photo-7.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/installation/photo-8.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/installation/photo-9.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/installation/poster.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/mindscape/photo-1.jpeg": {
+    "width": 2400,
+    "height": 1972
+  },
+  "/gallery/mindscape/photo-10.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/mindscape/photo-11.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/mindscape/photo-12.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/mindscape/photo-13.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/mindscape/photo-14.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/mindscape/photo-15.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/mindscape/photo-2.jpg": {
+    "width": 1024,
+    "height": 1536
+  },
+  "/gallery/mindscape/photo-3.jpg": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/gallery/mindscape/photo-4.jpg": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/gallery/mindscape/photo-5.jpg": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/gallery/mindscape/photo-6.jpg": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/gallery/mindscape/photo-7.jpg": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/gallery/mindscape/photo-8.jpg": {
+    "width": 1200,
+    "height": 1600
+  },
+  "/gallery/mindscape/photo-9.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/mindscape/poster.jpeg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/portfolio/photo-1.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/portfolio/photo-2.jpg": {
+    "width": 1350,
+    "height": 2400
+  },
+  "/gallery/portfolio/photo-3.jpg": {
+    "width": 1350,
+    "height": 2400
+  },
+  "/gallery/portfolio/photo-4.jpg": {
+    "width": 1807,
+    "height": 2400
+  },
+  "/gallery/portfolio/photo-5.jpg": {
+    "width": 1807,
+    "height": 2400
+  },
+  "/gallery/portfolio/poster.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/techverse/photo-1.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/techverse/photo-2.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/techverse/photo-3.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/techverse/photo-4.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/techverse/photo-5.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/techverse/photo-6.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/techverse/photo-7.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/techverse/poster.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/vision-x-20/photo-1.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/vision-x-20/photo-10.jpg": {
+    "width": 1600,
+    "height": 900
+  },
+  "/gallery/vision-x-20/photo-11.jpg": {
+    "width": 900,
+    "height": 1600
+  },
+  "/gallery/vision-x-20/photo-12.jpg": {
+    "width": 900,
+    "height": 1600
+  },
+  "/gallery/vision-x-20/photo-13.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/vision-x-20/photo-14.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/vision-x-20/photo-2.jpg": {
+    "width": 1800,
+    "height": 2400
+  },
+  "/gallery/vision-x-20/photo-3.jpg": {
+    "width": 900,
+    "height": 1600
+  },
+  "/gallery/vision-x-20/photo-4.jpg": {
+    "width": 900,
+    "height": 1600
+  },
+  "/gallery/vision-x-20/photo-5.jpg": {
+    "width": 900,
+    "height": 1600
+  },
+  "/gallery/vision-x-20/photo-6.jpg": {
+    "width": 1600,
+    "height": 900
+  },
+  "/gallery/vision-x-20/photo-7.jpg": {
+    "width": 1600,
+    "height": 900
+  },
+  "/gallery/vision-x-20/photo-8.jpg": {
+    "width": 900,
+    "height": 1600
+  },
+  "/gallery/vision-x-20/photo-9.jpg": {
+    "width": 900,
+    "height": 1600
+  },
+  "/gallery/vision-x-20/poster.jpg": {
+    "width": 2400,
+    "height": 1800
+  },
+  "/gallery/vision-x/photo-1.jpg": {
+    "width": 3072,
+    "height": 4096
+  },
+  "/gallery/vision-x/photo-2.jpg": {
+    "width": 4096,
+    "height": 3072
+  },
+  "/gallery/vision-x/photo-3.jpg": {
+    "width": 3024,
+    "height": 4032
+  },
+  "/gallery/vision-x/photo-4.jpg": {
+    "width": 4032,
+    "height": 3024
+  },
+  "/gallery/vision-x/photo-5.jpg": {
+    "width": 4032,
+    "height": 3024
+  },
+  "/gallery/vision-x/poster.jpg": {
+    "width": 4032,
+    "height": 3024
+  },
+  "/images/about/community-outreach.jpg": {
+    "width": 1024,
+    "height": 768
+  },
+  "/images/about/jit-building.jpg": {
+    "width": 1024,
+    "height": 768
+  },
+  "/images/about/lab-presentation.jpg": {
+    "width": 1024,
+    "height": 836
+  },
+  "/images/about/lab-session.jpg": {
+    "width": 1024,
+    "height": 592
+  },
+  "/images/about/techverse-team.jpg": {
+    "width": 670,
+    "height": 529
+  },
+  "/images/community-outreach.jpg": {
+    "width": 1024,
+    "height": 768
+  },
+  "/images/events/ai-driven-leadership.jpg": {
+    "width": 1024,
+    "height": 576
+  },
+  "/images/events/ai-pre-hackathon-workshop.png": {
+    "width": 883,
+    "height": 402
+  },
+  "/images/events/cyber-security-awareness-session.jpg": {
+    "width": 1024,
+    "height": 768
+  },
+  "/images/events/disha.png": {
+    "width": 897,
+    "height": 502
+  },
+  "/images/events/donation-drive.jpg": {
+    "width": 1024,
+    "height": 774
+  },
+  "/images/events/funfinity.jpg": {
+    "width": 986,
+    "height": 1024
+  },
+  "/images/events/portfolio-verse.png": {
+    "width": 797,
+    "height": 495
+  },
+  "/images/events/tech-talk-prof-pramod-pathak.jpg": {
+    "width": 422,
+    "height": 348
+  },
+  "/images/events/techverse.jpg": {
+    "width": 670,
+    "height": 529
+  },
+  "/images/events/visionx.jpg": {
+    "width": 1024,
+    "height": 712
+  },
+  "/images/jit-building.jpg": {
+    "width": 1024,
+    "height": 768
+  },
+  "/images/lab-presentation.jpg": {
+    "width": 1024,
+    "height": 836
+  },
+  "/images/lab-session.jpg": {
+    "width": 1024,
+    "height": 592
+  },
+  "/images/members/aarsh-kolhe.jpg": {
+    "width": 848,
+    "height": 1200
+  },
+  "/images/members/abhinay-sayare.jpg": {
+    "width": 495,
+    "height": 753
+  },
+  "/images/members/aditya-kanojiya.jpg": {
+    "width": 1200,
+    "height": 1200
+  },
+  "/images/members/anjali-markam.jpg": {
+    "width": 1023,
+    "height": 1537
+  },
+  "/images/members/armaan-khan.jpg": {
+    "width": 799,
+    "height": 1200
+  },
+  "/images/members/arshita-rambhade.png": {
+    "width": 965,
+    "height": 1200
+  },
+  "/images/members/aryan-thaware.png": {
+    "width": 675,
+    "height": 1200
+  },
+  "/images/members/atharva-ramteke.jpg": {
+    "width": 768,
+    "height": 1024
+  },
+  "/images/members/devkumar-sarkar.jpg": {
+    "width": 1122,
+    "height": 1402
+  },
+  "/images/members/durgesh-kubde.png": {
+    "width": 768,
+    "height": 1200
+  },
+  "/images/members/ganesh-mishra.jpg": {
+    "width": 800,
+    "height": 1334
+  },
+  "/images/members/gaurav-khedkar.jpg": {
+    "width": 1023,
+    "height": 1325
+  },
+  "/images/members/himanshu-borkar.png": {
+    "width": 960,
+    "height": 1200
+  },
+  "/images/members/karishma-andraskar.jpg": {
+    "width": 960,
+    "height": 1059
+  },
+  "/images/members/kavya-nandeshwar.jpg": {
+    "width": 768,
+    "height": 1024
+  },
+  "/images/members/kshitij-khobragade.jpg": {
+    "width": 960,
+    "height": 1100
+  },
+  "/images/members/kunal-barmase.jpg": {
+    "width": 818,
+    "height": 1599
+  },
+  "/images/members/lavina-pakhrani.jpg": {
+    "width": 1030,
+    "height": 1200
+  },
+  "/images/members/laxmi-khadakkar.jpg": {
+    "width": 894,
+    "height": 1416
+  },
+  "/images/members/lokesh-mahore.jpg": {
+    "width": 772,
+    "height": 1090
+  },
+  "/images/members/lucky-ghangare.jpg": {
+    "width": 562,
+    "height": 1000
+  },
+  "/images/members/mitali-ingle.jpg": {
+    "width": 684,
+    "height": 634
+  },
+  "/images/members/muskan-mistry.png": {
+    "width": 799,
+    "height": 1200
+  },
+  "/images/members/narendra-bawane.jpg": {
+    "width": 331,
+    "height": 440
+  },
+  "/images/members/nayan-there.png": {
+    "width": 984,
+    "height": 1200
+  },
+  "/images/members/nikhaar-gangwani.png": {
+    "width": 675,
+    "height": 1200
+  },
+  "/images/members/pallavi-methwani.png": {
+    "width": 799,
+    "height": 1200
+  },
+  "/images/members/parth-boldhane.png": {
+    "width": 944,
+    "height": 1128
+  },
+  "/images/members/parth-mankar.png": {
+    "width": 799,
+    "height": 1200
+  },
+  "/images/members/payal-karode.jpg": {
+    "width": 900,
+    "height": 1200
+  },
+  "/images/members/piyush-ladukar.png": {
+    "width": 901,
+    "height": 1200
+  },
+  "/images/members/pratyush-bawane.png": {
+    "width": 896,
+    "height": 1079
+  },
+  "/images/members/pravin-rangire.jpg": {
+    "width": 680,
+    "height": 1001
+  },
+  "/images/members/priyanka-gahane.jpg": {
+    "width": 682,
+    "height": 1280
+  },
+  "/images/members/reeha-rajput.jpg": {
+    "width": 992,
+    "height": 1586
+  },
+  "/images/members/sakshi-totlani.jpg": {
+    "width": 799,
+    "height": 1200
+  },
+  "/images/members/sampada-khond.png": {
+    "width": 900,
+    "height": 1200
+  },
+  "/images/members/samruddhi-gore.png": {
+    "width": 799,
+    "height": 1200
+  },
+  "/images/members/samruddhi-sable.jpg": {
+    "width": 900,
+    "height": 1200
+  },
+  "/images/members/sejal-chopade.png": {
+    "width": 900,
+    "height": 1200
+  },
+  "/images/members/shreya-choudhari.jpg": {
+    "width": 1055,
+    "height": 1491
+  },
+  "/images/members/uma-patel.jpg": {
+    "width": 399,
+    "height": 500
+  },
+  "/images/members/yogini-shende.jpg": {
+    "width": 758,
+    "height": 932
+  },
+  "/images/techverse-team.jpg": {
+    "width": 670,
+    "height": 529
+  },
+  "/logo.png": {
+    "width": 627,
+    "height": 625
+  },
+  "/uploads/event-posters6a9e40b375c8ddd55cbb9b57/088db591-14d5-4417-a156-17bb7c14f42c.jpg": {
+    "width": 796,
+    "height": 418
+  }
+}

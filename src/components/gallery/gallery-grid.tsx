@@ -2,13 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion, useSpring } from "motion/react";
-import { ArrowUpRight, ArrowUp, ChevronDown, Plus } from "lucide-react";
+import { ArrowUpRight, ArrowUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { GalleryEvent } from "@/data/gallery";
 import { DEFAULT_ACADEMIC_YEARS } from "@/data/gallery";
-import { CreateEventModal } from "./create-event-modal";
 
 const galleryEase = [0.22, 1, 0.36, 1] as const;
 const RAIL_TRACK_HEIGHT = 240;
@@ -104,13 +103,22 @@ function EventRow({
         aria-label={`Open ${event.title} photo gallery`}
       >
         <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-auto sm:w-[54%]">
-          <motion.img
-            src={event.poster}
-            alt={`${event.title} event photograph`}
+          {/* Wrapper carries the hover zoom so the photo itself can be a
+              next/image, which fills this already-sized box. */}
+          <motion.div
             whileHover={{ scale: 1.04 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+            className="absolute inset-0"
+          >
+            <Image
+              src={event.poster}
+              alt={`${event.title} event photograph`}
+              fill
+              // 54% of a max-w-5xl card from sm up, full width below it.
+              sizes="(min-width: 1024px) 553px, (min-width: 640px) 54vw, 100vw"
+              className="object-cover"
+            />
+          </motion.div>
         </div>
 
         <div className="relative flex flex-1 flex-col justify-between gap-6 p-6 sm:p-8">
@@ -206,9 +214,7 @@ function ScrollToTop() {
 }
 
 export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
-  const router = useRouter();
   const reduceMotion = useReducedMotion();
-  const [modalYear, setModalYear] = useState<string | null>(null);
 
   // Initialize expanded state for academic years.
   // 2026–27 is expanded by default when it contains events.
@@ -260,7 +266,6 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
             const count = yearEvents.length;
             const countText = `${String(count).padStart(2, "0")} ${count === 1 ? "EVENT" : "EVENTS"}`;
             const isExpanded = !!expandedYears[year];
-            const isCurrentYear = year === DEFAULT_ACADEMIC_YEARS[0];
 
             return (
               <section key={year} className="flex flex-col">
@@ -278,15 +283,6 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
                     <span className="font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
                       {year}
                     </span>
-                    {isCurrentYear && (
-                      <button
-                        type="button"
-                        onClick={() => setModalYear(year)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-primary/30 bg-primary/[0.06] px-2.5 py-1 font-mono text-xs font-semibold text-primary transition-all duration-300 hover:border-primary/60 hover:bg-primary/15 hover:shadow-xs"
-                      >
-                        <Plus className="size-3" /> Add Event
-                      </button>
-                    )}
                     <span className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground transition-colors group-hover:text-primary sm:text-sm">
                       {countText}
                     </span>
@@ -350,16 +346,6 @@ export function GalleryGrid({ events }: { events: GalleryEvent[] }) {
           })}
         </div>
       </div>
-
-      <CreateEventModal
-        isOpen={Boolean(modalYear)}
-        academicYear={modalYear ?? undefined}
-        onClose={() => setModalYear(null)}
-        onSuccess={() => {
-          setModalYear(null);
-          router.refresh();
-        }}
-      />
 
       <LocatorGlyph className="pointer-events-none fixed bottom-6 left-6 z-10 hidden size-5 text-muted-foreground/40 lg:block" />
       <ScrollToTop />

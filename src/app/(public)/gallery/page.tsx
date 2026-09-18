@@ -2,14 +2,23 @@ import type { Metadata } from "next";
 import { SectionHeading } from "@/components/site/section-heading";
 import { GalleryGrid, HeroLineArt, LocatorGlyph } from "@/components/gallery/gallery-grid";
 import { GalleryBackground } from "@/components/gallery/gallery-background";
-import { galleryEvents } from "@/data/gallery";
+import { getGalleryEvents } from "@/lib/data/gallery-events";
+
+/**
+ * Albums live in MongoDB, so this page cannot be baked once at build time.
+ * The admin create/delete routes call revalidatePath("/gallery"); this window
+ * is the backstop if that ever does not run (a write from outside the app, or
+ * a failed revalidate).
+ */
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Gallery — Encypherist",
   description: "Photos from Encypherist events at Jhulelal Institute of Technology, Nagpur.",
 };
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const galleryEvents = await getGalleryEvents();
   return (
     <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <GalleryBackground />

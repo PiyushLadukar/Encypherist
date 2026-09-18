@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LocalImage } from "@/components/site/local-image";
 import { CalendarDays, MapPin, ArrowUpRight, ImageOff } from "lucide-react";
 import { ConfidenceBadge } from "@/components/site/confidence-badge";
 import { formatDateRange, eventTypeLabel } from "@/lib/format";
@@ -17,10 +18,12 @@ export function EventCard({ event, className }: { event: Event; className?: stri
       <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/60 bg-black/90">
         {event.poster_url ? (
           <div className="relative h-full w-full overflow-hidden">
-            <img
+            <LocalImage
               src={event.poster_url}
               alt={event.title}
-              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              fill
+              sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
             {/* Subtle vignette gradient overlay */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />

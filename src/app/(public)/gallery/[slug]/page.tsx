@@ -1,12 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { EventCollage } from "@/components/gallery/event-collage";
 import { GalleryBackground } from "@/components/gallery/gallery-background";
 import { Reveal } from "@/components/site/reveal";
 import { galleryEvents } from "@/data/gallery";
+import { getGalleryEvents } from "@/lib/data/gallery-events";
 
+/**
+ * Albums live in MongoDB, so this page cannot be baked once at build time.
+ * The admin create/delete routes call revalidatePath("/gallery"); this window
+ * is the backstop if that ever does not run (a write from outside the app, or
+ * a failed revalidate).
+ */
+export const revalidate = 300;
+
+/**
+ * Only the built-in catalog is pre-rendered. Albums created through the admin
+ * panel live in MongoDB and are rendered on demand — Next's default
+ * `dynamicParams` allows a slug that is not listed here.
+ */
 export function generateStaticParams() {
   return galleryEvents.map((event) => ({ slug: event.id }));
 }
@@ -17,7 +32,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const event = galleryEvents.find((e) => e.id === slug);
+  const event = (await getGalleryEvents()).find((e) => e.id === slug);
   if (!event) return { title: "Gallery — Encypherist" };
   return {
     title: `${event.title} — Gallery — Encypherist`,
@@ -31,10 +46,11 @@ export default async function GalleryEventPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const event = galleryEvents.find((e) => e.id === slug);
+  const allEvents = await getGalleryEvents();
+  const event = allEvents.find((e) => e.id === slug);
   if (!event) notFound();
 
-  const index = galleryEvents.findIndex((e) => e.id === slug);
+  const index = allEvents.findIndex((e) => e.id === slug);
   const number = String(index + 1).padStart(2, "0");
 
   return (
@@ -52,10 +68,14 @@ export default async function GalleryEventPage({
       <Reveal className="mt-8 grid gap-6 border-b border-border pb-10 lg:grid-cols-[minmax(0,1.35fr)_minmax(15rem,0.65fr)] lg:items-end">
         <div className="order-last overflow-hidden rounded-2xl border border-border/70 bg-card shadow-[0_2px_20px_-8px_rgba(0,0,0,0.1)] lg:order-first">
           <div className="relative aspect-[16/10]">
-            <img
+            <Image
               src={event.poster}
               alt={`${event.title} event poster`}
-              className="absolute inset-0 h-full w-full object-cover"
+              fill
+              // Left column of a max-w-6xl two-column header.
+              sizes="(min-width: 1024px) 640px, 100vw"
+              preload
+              className="object-cover"
             />
           </div>
         </div>
