@@ -1,4 +1,5 @@
 import { ConfidenceBadge } from "@/components/site/confidence-badge";
+import { LocalImage } from "@/components/site/local-image";
 import { GithubIcon, InstagramIcon, LinkedinIcon } from "@/components/site/social-icons";
 import { ShareButton } from "@/components/members/share-button";
 import { initials, memberDomain, memberStatus, teamGroupLabel } from "@/lib/format";
@@ -39,11 +40,15 @@ export function MemberIdCard({ member }: { member: Member }) {
       {/* portrait */}
       <div className="relative aspect-[4/5] w-full overflow-hidden border-b border-border bg-zinc-900">
         {member.photo_url ? (
-          <img
+          <LocalImage
             src={member.photo_url}
             alt={member.name}
+            fill
+            // The ID card is capped at max-w-sm (384px).
+            sizes="384px"
+            preload
             style={{ objectPosition: member.photo_position ?? "center 20%" }}
-            className="size-full object-cover"
+            className="object-cover"
           />
         ) : (
           <div className="flex size-full items-center justify-center font-heading text-6xl font-semibold text-emerald-400">

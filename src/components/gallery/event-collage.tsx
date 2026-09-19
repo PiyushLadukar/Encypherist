@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
 import { Lightbox } from "@/components/gallery/lightbox";
 import { Stagger, StaggerItem } from "@/components/site/reveal";
+import { getImageDimensions } from "@/lib/image-dimensions";
 import type { GalleryEvent } from "@/data/gallery";
 
 const collageEase = [0.22, 1, 0.36, 1] as const;
@@ -25,11 +27,18 @@ export function EventCollage({ event }: { event: GalleryEvent }) {
               className="group relative block w-full overflow-hidden rounded-xl bg-card text-left shadow-sm transition-shadow duration-300 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               aria-label={`Open photo ${index + 1} from ${event.title}`}
             >
-              <img
+              <Image
                 src={image}
                 alt={`${event.title} photograph ${index + 1}`}
-                className="block h-auto w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
+                width={getImageDimensions(image).width}
+                height={getImageDimensions(image).height}
+                // Masonry: one column on mobile, two from sm, three from lg,
+                // four from xl inside a max-w-6xl page — roughly 260px each at
+                // the widest. Without this the browser assumes 100vw and pulls
+                // a needlessly large file for every thumbnail.
+                sizes="(min-width: 1280px) 260px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                 loading={index > 5 ? "lazy" : "eager"}
+                className="block h-auto w-full transition-transform duration-500 ease-out group-hover:scale-[1.03]"
               />
             </motion.button>
           </StaggerItem>

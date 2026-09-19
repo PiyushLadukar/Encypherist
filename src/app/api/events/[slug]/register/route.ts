@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
-import { store } from "@/lib/store";
-import { registrationSchema } from "@/lib/validation/registration";
-import { isPast } from "@/lib/format";
+import { getCollections } from "@/lib/mongodb";
+import { getEventBySlugAdmin } from "@/lib/data/admin-events";
+import { isRegistrationOpen } from "@/lib/event-status";
+import { buildRegistrationSchema, checkEligibility } from "@/lib/validation/registration";
+import { splitFields, deriveParticipant, hasIdentity } from "@/lib/registration-form";
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+
+  const event = await getEventBySlugAdmin(slug);
+  if (!event || event.status !== "published") {
+    return NextResponse.json({ error: "Event not found." }, { status: 404 });
+  }
+
+  const registrationState = isRegistrationOpen(event);
+  if (!registrationState.open) {
+    return NextResponse.json({ error: registrationState.reason }, { status: 403 });
+  }
 
   let body: unknown;
   try {
@@ -17,51 +25,74 @@ export async function POST(
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const parsed = registrationSchema.safeParse(body);
+  // Never trust the client's declared registration type/team size/required
+  // fields — re-derive and re-validate the whole schema from the event's
+  // live server-side configuration.
+  const schema = buildRegistrationSchema(event);
+  const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Please check the form for errors.", issues: parsed.error.flatten().fieldErrors },
+      { error: "Please check the form for errors.", issues: parsed.error.flatten() },
       { status: 400 }
     );
   }
+  const data = parsed.data;
 
-  const event = store.events.find((e) => e.slug === slug);
+  // Reconstruct the {name,email,phone,department,year} participant record(s)
+  // from the answers to the identity-tagged form fields.
+  const { identityFields } = splitFields(event.registrationForm.fields);
+  const individual =
+    data.registrationType === "individual" ? deriveParticipant(identityFields, data.identity) : null;
+  const team =
+    data.registrationType === "team"
+      ? {
+          teamName: data.team.teamName,
+          leader: deriveParticipant(identityFields, data.team.leader),
+          members: data.team.members.map((m: Record<string, unknown>) =>
+            deriveParticipant(identityFields, m)
+          ),
+        }
+      : null;
 
-  if (!event || event.status !== "published") {
-    return NextResponse.json({ error: "Event not found." }, { status: 404 });
-  }
-  if (!event.registration_enabled) {
-    return NextResponse.json({ error: "Registration isn't open for this event." }, { status: 403 });
-  }
-  if (event.registration_deadline && isPast(event.registration_deadline)) {
-    return NextResponse.json({ error: "Registration has closed." }, { status: 403 });
-  }
-
-  const existingCount = store.eventRegistrations.filter((r) => r.event_id === event.id).length;
-  if (event.capacity && existingCount >= event.capacity) {
-    return NextResponse.json({ error: "This event is full." }, { status: 403 });
-  }
-
-  const { branch, year, ...rest } = parsed.data;
-
-  const alreadyRegistered = store.eventRegistrations.some(
-    (r) => r.event_id === event.id && r.email.toLowerCase() === rest.email.toLowerCase()
-  );
-  if (alreadyRegistered) {
-    return NextResponse.json(
-      { error: "You've already registered for this event with this email." },
-      { status: 409 }
-    );
+  const responsible = team ? team.leader : individual!;
+  const eligibility = checkEligibility(event, responsible);
+  if (!eligibility.eligible) {
+    return NextResponse.json({ error: eligibility.reason }, { status: 403 });
   }
 
-  store.eventRegistrations.push({
-    id: randomUUID(),
-    event_id: event.id,
-    ...rest,
-    branch: branch || null,
-    year: year || null,
-    extra: {},
-    created_at: new Date().toISOString(),
+  const { registrations } = await getCollections();
+
+  // Duplicate detection keys on email — only possible when the form still
+  // collects one.
+  if (hasIdentity(event.registrationForm.fields, "email") && responsible.email) {
+    const email = responsible.email.toLowerCase();
+    const duplicate = await registrations.findOne({
+      eventId: event.id,
+      deletedAt: null,
+      $or: [{ "individual.email": email }, { "team.leader.email": email }],
+    });
+    if (duplicate) {
+      return NextResponse.json(
+        { error: "You've already registered for this event with this email." },
+        { status: 409 }
+      );
+    }
+  }
+
+  const now = new Date();
+  await registrations.insertOne({
+    eventId: event.id,
+    registrationType: data.registrationType,
+    status: "pending",
+    deletedAt: null,
+    formVersion: event.registrationForm.version,
+    formSnapshot: event.registrationForm.fields,
+    responses: data.responses,
+    individual,
+    team,
+    submittedAt: now,
+    updatedAt: now,
+    updatedBy: null,
   });
 
   return NextResponse.json({ success: true }, { status: 201 });

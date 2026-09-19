@@ -22,12 +22,18 @@ system metadata, a vertical event timeline — translated into Encypherist's own
 cipher-themed identity rather than copied. The full analysis and the principle-by-
 principle translation live in [`docs/cidc-analysis.md`](docs/cidc-analysis.md).
 
-**Current data mode: in-memory fake data**, not a live database. This was a deliberate
-scope decision (see [Data mode](#data-mode-in-memory-fake-data) below) — the app is
-fully functional end-to-end, but content resets when the server restarts. A complete
-Supabase backend (schema, RLS policies, migrations) is already written and sitting in
-the repo, ready to be wired in — see
-[Switching to live Supabase](#switching-to-live-supabase-optional).
+**Two data modes, by design.** Members/Projects/Gallery/Settings run on **in-memory
+fake data** — a deliberate scope decision (see
+[Data mode](#data-mode-membersprojectsgallerysettings-run-on-in-memory-fake-data)
+below); content resets when the server restarts, and there's currently no admin UI
+for this content (edit `seed/*.json` directly). The **admin dashboard and event
+system** (`/admin` — events, eligibility, dynamic registration forms, team/individual
+registration, participant management, CSV/Excel export) is a real, separate subsystem
+backed by **MongoDB** and **Auth.js** sessions — see
+[Admin & MongoDB setup](#admin--mongodb-setup) below. A complete but unrelated
+Supabase backend (schema, RLS policies, migrations) also sits in the repo, written but
+unwired — see
+[Switching Members/Projects/Gallery to Supabase](#switching-membersprojectsgallery-to-supabase-optional).
 
 ## Features
 
@@ -56,10 +62,14 @@ the repo, ready to be wired in — see
 - **Registration** — a real form at `/events/[slug]/register`, server-validated
   (zod), duplicate-email blocked, capacity- and deadline-aware.
 - **Gallery** (`/gallery`) — masonry layout with a full keyboard-navigable lightbox.
-- **Admin CMS** (`/admin`) — session-cookie auth, dashboard, full CRUD for events,
-  projects and members (with an event preview that renders the exact same component
-  as the public page), registrations viewer with CSV export, gallery manager with
-  image upload, site settings.
+- **Admin event platform** (`/admin`) — real authentication (Auth.js + MongoDB,
+  bcrypt-hashed passwords, RBAC with `admin`/`super_admin` roles), a dashboard with
+  event/registration stats, a sectioned event editor (basic details, registration
+  settings, eligibility, a dynamic registration-form builder, publish state), poster
+  upload, per-event participant/team management with search/filter/status changes,
+  and CSV/Excel export. See [Admin & MongoDB setup](#admin--mongodb-setup) below —
+  this is a separate subsystem from the rest of the site, backed by MongoDB rather
+  than the in-memory store.
 - **Confidence badges** — anything not fully verified (see `docs/research.md`) carries
   a visible "Likely" or "Unverified" badge on the public site instead of being
   presented as fact.
@@ -73,9 +83,13 @@ the repo, ready to be wired in — see
 - **Styling:** Tailwind CSS v4, shadcn/ui (base-ui primitives)
 - **Animation:** Motion (`motion/react`)
 - **Validation:** Zod
-- **Data (current):** an in-memory store seeded from `seed/*.json`
-- **Data (ready, not wired):** Supabase (Postgres, Auth, Storage) — schema in
-  `supabase/migrations/`
+- **Data (Members/Projects/Gallery/Settings):** an in-memory store seeded from `seed/*.json`
+- **Data (Admin/Events/Registrations):** MongoDB, via the official `mongodb` driver
+- **Admin auth:** Auth.js (NextAuth v5), Credentials provider, JWT sessions, bcrypt password hashing
+- **File storage (admin uploads):** local disk (`public/uploads/`)
+- **Data (written, not wired):** Supabase (Postgres, Auth, Storage) — schema in
+  `supabase/migrations/`; this predates and is unrelated to the MongoDB-backed admin
+  system, see [Switching Members/Projects/Gallery to Supabase](#switching-membersprojectsgallery-to-supabase-optional)
 - **Deployment target:** Vercel (or any Node host)
 
 ## Architecture
@@ -85,76 +99,126 @@ src/
   app/
     (public)/            homepage, members, events, gallery — public route group
     admin/
-      login/              standalone, unauthenticated
-      (protected)/        dashboard, events, members, registrations, gallery, settings
+      login/              standalone, unauthenticated (Auth.js Credentials sign-in)
+      (protected)/        dashboard, events (list/new/edit/archived), participants, admins
     api/
-      events/[slug]/register/   public registration endpoint
-      admin/                    admin-only CRUD endpoints (all guarded server-side)
-      admin/login, admin/logout
+      auth/[...nextauth]/       Auth.js route handler
+      events/[slug]/register/   public registration endpoint (dynamic per event config)
+      events/[slug]/upload/     public upload endpoint for "file" registration fields
+      admin/events/[id]/export/ CSV/Excel export (admin-only)
   components/
     site/                nav, footer, logo, section heading, confidence badge, reveal,
                          boot-sequence, system-status-card
-    members/, events/, projects/, gallery/, admin/
+    members/, events/, projects/, gallery/    public-site components (in-memory store)
+    admin/               admin dashboard UI: event-form/ (basic/registration/eligibility/
+                         form-builder/publish sections), participants/, admins/, sidebar
     ui/                  shadcn/ui primitives
   lib/
-    store.ts             the in-memory data store (see below)
-    fake-auth.ts         cookie-based admin session (see below)
-    auth.ts              requireAdmin() — the real authorization boundary
-    admin-guard.ts        requireAdminApi() — same boundary for API routes
-    data/                typed query functions (members, events, projects, gallery, settings, admin)
-    validation/          zod schemas (registration, event, member, project)
+    store.ts             the in-memory data store for Members/Projects/Gallery/Settings
+    mongodb.ts           MongoDB client singleton (admin/events/registrations)
+    admin-guard.ts       requireAdminPage()/requireAdminApi() — the real authorization
+                         boundary, re-checks isActive/role against MongoDB every call
+    audit.ts             admin action audit log writer
+    uploads.ts           poster/file upload validation (extension+MIME+magic bytes) + disk write
+    export.ts            CSV/Excel row-building + formula-injection-safe escaping
+    event-status.ts       derives Draft/Upcoming/Registration Open|Closed/Ongoing/
+                         Completed/Archived from an event's dates + admin-set status
+    data/                typed query functions — events.ts (public, Mongo), admin-events.ts,
+                         registrations.ts, admins.ts (Mongo); members/projects/gallery/
+                         settings.ts (in-memory store, untouched)
+    actions/             "use server" Server Actions for events/registrations/admins,
+                         each starting with requireAdminApi()
+    validation/          zod schemas — event.ts, registration.ts (builds a per-event
+                         dynamic schema from its live form config), form-field.ts, admin.ts
     supabase/            Supabase client wrappers — present, currently unused (see below)
-  types/database.ts      hand-written types mirroring the Supabase schema
+  auth.ts                Auth.js (NextAuth) config — Credentials provider, JWT sessions
+  proxy.ts               UX-only redirect for logged-out /admin/* visits (Next.js 16's
+                         renamed `middleware` convention) — NOT the security boundary
+  types/
+    database.ts          hand-written types mirroring the (unused) Supabase schema
+    models.ts            hand-written types for the MongoDB-backed admin/event system
 supabase/
-  migrations/001_init.sql  full schema + RLS policies + storage bucket policies
+  migrations/001_init.sql  full schema + RLS policies + storage bucket policies (predates
+                            and is unrelated to the MongoDB admin system — see below)
 scripts/
   run-migrations.ts      applies supabase/migrations/*.sql via SUPABASE_DB_URL
   seed/index.ts          loads seed/*.json into a live Supabase project
+  seed-admin.ts          creates/promotes an admin account in MongoDB (the only way to
+                         provision one — no public admin-registration endpoint exists)
+  seed-mongo-events.ts   one-time migration of seed/events.json into MongoDB
 seed/                    the verified content — members.json, events.json, projects.json, etc.
 docs/
   research.md            Encypherist research trail and source citations
   cidc-analysis.md        CIDC design reverse-engineering + translation to Encypherist
 ```
 
-## Data mode: in-memory fake data
+## Data mode: Members/Projects/Gallery/Settings run on in-memory fake data
 
-The app currently runs on `src/lib/store.ts` — a plain in-process object seeded once
-from `seed/*.json` at server start, stashed on `globalThis` so every route in the
-process shares one instance. Admin CRUD operations mutate this object directly (see
-`src/app/api/admin/*/route.ts`).
+`src/lib/store.ts` is a plain in-process object seeded once from `seed/*.json` at
+server start, stashed on `globalThis` so every route in the process shares one
+instance. **This part of the app is unrelated to the admin/event system below** and
+was not touched by it.
 
 **What this means:**
-- Everything works end-to-end — create an event in the admin, it appears on the public
-  site immediately.
+- Everything for Members/Projects/Gallery/Settings works end-to-end for local/demo use.
 - Data **resets whenever the dev/prod server process restarts.**
-- If deployed to a serverless platform with multiple instances (e.g. Vercel's default
-  behavior), state can become inconsistent across instances. Fine for a demo/local
-  run, not for real multi-instance production.
-- Admin auth is a minimal cookie-based session (`src/lib/fake-auth.ts`), not Supabase
-  Auth — see [Admin access](#admin-access) below.
-- Image uploads write to `public/uploads/<bucket>/` on local disk
-  (`src/app/api/admin/upload/route.ts`), not Supabase Storage.
+- If deployed to a serverless platform with multiple instances, state can become
+  inconsistent across instances. Fine for a demo/local run, not real multi-instance
+  production.
+- There is currently no admin UI for editing Members/Projects/Gallery content — a
+  previous admin CMS for these existed on this repo's `main` branch but was removed
+  from `development` in an earlier commit. Edit `seed/*.json` directly and restart the
+  dev server, or see [Switching Members/Projects/Gallery to Supabase](#switching-membersprojectsgallery-to-supabase-optional).
 
-This was a deliberate pivot mid-build, requested to get a fully working MVP without
-requiring Supabase project setup first. The original plan (see `docs/` git history /
-project plan) was live Supabase from the start; that implementation — full schema,
-RLS policies, typed client wrappers — is still in the repo and described below.
+## Admin & MongoDB setup
 
-## Admin access
+The admin dashboard and event-management system (`/admin`) is a separate subsystem
+from the section above — it's backed by **MongoDB** and real **Auth.js** sessions, not
+the in-memory store or a fake login. It won't function until you provide a MongoDB
+connection string.
 
-Demo credentials (change via env vars before sharing this beyond local use):
+1. **Create a MongoDB database** — a free [MongoDB Atlas](https://www.mongodb.com/atlas)
+   cluster works, or run MongoDB locally.
+2. **Copy `.env.local.example` to `.env.local`** and fill in:
+   - `MONGODB_URI` — your connection string
+   - `MONGODB_DB_NAME` — defaults to `encypherist` if unset
+   - `AUTH_SECRET` — generate with `npx auth secret` or `openssl rand -base64 32`
+3. **Create the first admin account** — there is deliberately no public
+   admin-registration page, so this is the only way in:
+   ```bash
+   npm run db:seed-admin -- --name="Jane Doe" --email=jane@example.com --password=ChangeMe123 --role=super_admin
+   ```
+   Indexes (`admins.email` unique) are created automatically by this script.
+4. **(Optional) Migrate existing seed events into MongoDB**, so anything already in
+   `seed/events.json` isn't lost:
+   ```bash
+   npm run db:seed-mongo-events
+   ```
+   Safe to re-run (upserts by slug). Old events had no eligibility/team/form config,
+   so those come out at generic defaults (open to everyone, individual registration,
+   no custom fields) — edit each event afterwards to configure them properly.
+5. **Sign in** at `/admin/login` with the account from step 3.
 
-```
-Email:    admin@encypherist.local
-Password: encypherist2k26
-```
+**Authorization model** (spec-driven, see `src/lib/admin-guard.ts`): every admin page
+and every Server Action/API route independently calls `requireAdminPage()` /
+`requireAdminApi()`, which re-reads `isActive` and `role` from MongoDB on every call —
+never just trusting the JWT session claim. This means deactivating an admin (from
+Admin Management, super-admin only) takes effect immediately, not at next token
+refresh. `src/proxy.ts`'s redirect for logged-out `/admin/*` visits is a UX
+convenience only, exactly like the old fake-auth system's stated principle — it is
+never the actual security boundary.
 
-Override with `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env.local`. Sessions are an
-httpOnly cookie referencing a token held in an in-process `Map` — good enough for a
-single-instance demo, not a real auth system. `src/lib/auth.ts`'s `requireAdmin()` is
-the actual authorization boundary (checked independently in every admin page and every
-`/api/admin/*` route) — the `/admin/*` proxy (middleware) redirect is a UX convenience
-only, not the security boundary.
+**Roles:** `admin` and `super_admin`. Only super admins can reach `/admin/admins` to
+create new admins or activate/deactivate existing ones (a super admin can't deactivate
+themselves, and the last active super admin can't be deactivated, to avoid locking
+everyone out).
+
+**File uploads** (event posters, and registrant-submitted "file" fields) write to
+`public/uploads/` on local disk after validating file size, extension, declared MIME
+type, and actual file content (magic-byte sniffing via `file-type`) — filenames are
+server-generated UUIDs, never the uploaded filename. This has the same multi-instance/
+serverless caveat as the in-memory store above; migrating to Cloudinary/S3 is a
+drop-in replacement for `src/lib/uploads.ts`'s two functions if you outgrow local disk.
 
 ## Local development
 
@@ -163,7 +227,8 @@ npm install
 npm run dev
 ```
 
-Visit `http://localhost:3000`. Sign in at `/admin/login` with the credentials above.
+Visit `http://localhost:3000`. The public site (Home/Members/Projects/Gallery/About)
+works immediately with zero configuration. `/admin` needs the MongoDB setup above.
 
 Other scripts:
 
@@ -175,76 +240,60 @@ npm run build         # production build
 
 ## Environment variables
 
-None are required to run the app as-is (fake-data mode needs nothing). `.env.local.example`
-documents the variables needed only if you switch to live Supabase (see below).
-`ADMIN_EMAIL` / `ADMIN_PASSWORD` are optional overrides for the demo admin login.
+None are required to run the **public site** (Members/Projects/Gallery/Settings) —
+fake-data mode needs nothing. `MONGODB_URI`, `MONGODB_DB_NAME` and `AUTH_SECRET` are
+required for the **admin/event system** — see [Admin & MongoDB setup](#admin--mongodb-setup).
+`.env.local.example` documents all of these, plus the Supabase variables needed only
+if you switch Members/Projects/Gallery/Settings to Supabase (see below).
 
-## Switching to live Supabase (optional)
+## Switching Members/Projects/Gallery to Supabase (optional)
 
-The full Supabase implementation is written and sitting in the repo, unused. To wire
-it back in:
+A full Supabase implementation (Postgres, RLS, storage buckets) is written and sitting
+in the repo, unused — but note it predates the MongoDB-backed admin/event system
+above and its `events` / `event_registrations` / `admin_profiles` tables are now
+**superseded, not to be revived**: events, registrations and admin accounts live in
+MongoDB going forward. This section only applies to Members, Projects, Gallery and
+Settings, which still run on `src/lib/store.ts` today.
 
 1. **Create a Supabase project** at [supabase.com](https://supabase.com).
 2. **Copy `.env.local.example` to `.env.local`** and fill in:
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Project Settings → API)
    - `SUPABASE_SERVICE_ROLE_KEY` (same page — server-only, never expose to the client)
    - `SUPABASE_DB_URL` (Project Settings → Database → Connection string → Session pooler)
-3. **Run the migration:** `npm run db:migrate` — applies `supabase/migrations/001_init.sql`
-   (tables, indexes, RLS policies, the `event_registration_count` RPC, storage bucket
-   policies).
-4. **Seed verified content:** `npm run db:seed` — loads `seed/*.json` into the new
-   tables.
-5. **Create an admin user:** in the Supabase dashboard, add a user under
-   Authentication, then insert a row into `admin_profiles` for that user's `id` via
-   the SQL editor (there is intentionally no signup/self-elevation endpoint):
-   ```sql
-   insert into admin_profiles (id, role) values ('<user-uuid>', 'admin');
-   ```
-6. **Swap the data layer:** `src/lib/data/*.ts` currently import from `@/lib/store`;
-   point them back at `src/lib/supabase/server.ts`'s `createClient()` instead (the
-   original Supabase-backed versions follow the same function signatures — diff
-   against `supabase/migrations/001_init.sql` and the RLS policies described there to
-   confirm query shape).
-7. **Swap auth:** replace `src/lib/fake-auth.ts` / `src/lib/auth.ts` usage with
-   Supabase Auth (`src/lib/supabase/client.ts` + `server.ts` are already written for
-   this), and restore `src/middleware.ts` from `src/lib/supabase/middleware.ts`
-   (currently `src/proxy.ts` checks a plain cookie instead).
-8. **Swap uploads:** point `src/app/api/admin/upload/route.ts` at Supabase Storage
-   (bucket policies for `forum-assets`, `member-images`, `event-posters`,
-   `event-gallery` are already created by the migration) instead of local disk.
-
-The migration includes a `projects` table (mirroring the Projects feature) with the
-same public-read-when-published / admin-write RLS pattern as everything else, and
-`scripts/seed/index.ts` seeds it from `seed/projects.json` (currently an empty array —
-see `docs/research.md` §11 for why).
-
-RLS design (already in the migration): public reads are scoped to
-`published`/`status = 'published'` rows; `event_registrations` has **no public read
-policy at all** (registrant PII is admin-only); a `security definer` RPC
-(`event_registration_count`) lets the public UI show a capacity counter without ever
-exposing individual registrant rows.
+3. **Run the migration:** `npm run db:migrate` — applies `supabase/migrations/001_init.sql`.
+4. **Seed verified content:** `npm run db:seed` — loads `seed/*.json` into the new tables.
+5. **Swap the data layer:** `src/lib/data/members.ts`, `projects.ts`, `gallery.ts`,
+   `settings.ts` currently import from `@/lib/store`; point them at
+   `src/lib/supabase/server.ts`'s `createClient()` instead. Leave `src/lib/data/events.ts`,
+   `admin-events.ts`, `registrations.ts` and `admins.ts` alone — those stay on MongoDB.
+6. There is intentionally no admin UI yet for Members/Projects/Gallery (see
+   [Data mode](#data-mode-membersprojectsgallerysettings-run-on-in-memory-fake-data)
+   above) — editing still means either `seed/*.json` + `db:seed`, or the Supabase
+   dashboard directly, until that admin surface is rebuilt.
 
 ## Adding members, events and projects
 
-**Right now (fake-data mode):** either use the admin UI (`/admin/members/new`,
-`/admin/events/new`, `/admin/projects/new`), or edit `seed/members.json` /
-`seed/events.json` / `seed/projects.json` directly and restart the dev server (the
-store re-seeds from these files on every process start).
-
-**After switching to Supabase:** the admin UI is unchanged; `seed/*.json` becomes the
-input to `npm run db:seed` for the initial load, and everything after that goes
-through the admin UI as normal.
+- **Members/Projects/Gallery:** edit `seed/members.json` / `seed/projects.json` /
+  `seed/gallery.ts` directly and restart the dev server (or migrate to Supabase, above).
+- **Events:** use the admin dashboard at `/admin/events/new` (see
+  [Admin & MongoDB setup](#admin--mongodb-setup)) — this is the only supported way to
+  create/edit events now that they're MongoDB-backed and configuration-driven
+  (eligibility, team size, dynamic form fields all live on the event document, not in
+  seed files). `npm run db:seed-mongo-events` is a one-time import for pre-existing
+  `seed/events.json` content only.
 
 ## Deployment (Vercel)
 
 ```bash
 vercel
 ```
-Fake-data mode deploys with zero configuration. If you've switched to Supabase, set
-the environment variables from `.env.local` in the Vercel project settings before
-deploying. Note the fake-data mode's known limitation on multi-instance serverless
-platforms (see [Data mode](#data-mode-in-memory-fake-data)) — this is a strong reason
-to switch to Supabase before any real deployment beyond a demo link.
+The public site (Members/Projects/Gallery/Settings) deploys with zero configuration.
+For the admin/event system, set `MONGODB_URI`, `MONGODB_DB_NAME` and `AUTH_SECRET` in
+the Vercel project settings before deploying, and run `npm run db:seed-admin` against
+that MongoDB instance to provision the first admin. Note local-disk uploads
+(`public/uploads/`) don't persist across deploys/instances on serverless platforms —
+migrate `src/lib/uploads.ts` to Cloudinary/S3 before relying on posters surviving a
+redeploy in production.
 
 ## Research methodology
 

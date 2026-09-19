@@ -111,4 +111,11 @@ export const galleryEvents: GalleryEvent[] = [
     ],
     academicYear: "2026–27",
   },
+  {
+    id: "vision-x-20",
+    title: "VISION-X 2.0",
+    poster: "/gallery/vision-x-20/poster.jpg",
+    images: Array.from({ length: 14 }, (_, index) => `/gallery/vision-x-20/photo-${index + 1}.jpg`),
+    academicYear: "2026–27",
+  },
 ];

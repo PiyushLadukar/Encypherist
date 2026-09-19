@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion, type PanInfo } from "motion/react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { getImageDimensions } from "@/lib/image-dimensions";
 import type { GalleryEvent } from "@/data/gallery";
 
 const lightboxEase = [0.22, 1, 0.36, 1] as const;
@@ -64,10 +66,10 @@ export function Lightbox({ event, index, onClose, onNavigate }: { event: Gallery
       >
         <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-black/20">
           <AnimatePresence mode="wait" initial={false}>
-            <motion.img
+            {/* The drag and slide animation live on a wrapper so the photo
+                itself can be a next/image — motion cannot animate it directly. */}
+            <motion.div
               key={image}
-              src={image}
-              alt={`${event.title} photograph ${index + 1}`}
               initial={{ opacity: 0, x: 24, scale: 0.99 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: -24, scale: 0.99 }}
@@ -76,8 +78,19 @@ export function Lightbox({ event, index, onClose, onNavigate }: { event: Gallery
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={0.6}
               onDragEnd={handleDragEnd}
-              className="max-h-[calc(100vh-11rem)] max-w-full cursor-grab object-contain active:cursor-grabbing"
-            />
+              className="flex cursor-grab items-center justify-center active:cursor-grabbing"
+            >
+              <Image
+                src={image}
+                alt={`${event.title} photograph ${index + 1}`}
+                width={getImageDimensions(image).width}
+                height={getImageDimensions(image).height}
+                // Fullscreen view, capped by the max-w-6xl shell around it.
+                sizes="(min-width: 1152px) 1152px, 100vw"
+                className="h-auto w-auto max-h-[calc(100vh-11rem)] max-w-full object-contain"
+                draggable={false}
+              />
+            </motion.div>
           </AnimatePresence>
         </div>
         <div className="flex items-center justify-between gap-4 border-t border-border p-4">

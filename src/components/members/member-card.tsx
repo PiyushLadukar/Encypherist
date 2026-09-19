@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LocalImage } from "@/components/site/local-image";
 import { useState } from "react";
 import { motion } from "motion/react";
 import { ConfidenceBadge } from "@/components/site/confidence-badge";
@@ -133,13 +134,16 @@ export function MemberCard({ member, className }: { member: Member; className?: 
           )}
         >
           {member.photo_url ? (
-            <motion.img
-              layout
+            <LocalImage
               src={member.photo_url}
               alt={member.name}
+              fill
+              // Grows from an 80px thumbnail to a ~320px frame on hover, so the
+              // larger state is what has to be requested.
+              sizes="(min-width: 640px) 320px, 80vw"
               style={{ objectPosition: member.photo_position ?? "center 20%" }}
               className={cn(
-                "size-full object-cover transition-transform duration-500 ease-out",
+                "object-cover transition-transform duration-500 ease-out",
                 hovered && "scale-105"
               )}
             />

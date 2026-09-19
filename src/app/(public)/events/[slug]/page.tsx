@@ -48,7 +48,17 @@ export default async function EventDetailPage({
         </Link>
       </div>
       {event.start_at ? (
-        <EventDetailView event={event} registeredCount={registeredCount} />
+        <EventDetailView
+          event={event}
+          registeredCount={registeredCount}
+          registrationType={
+            event.registrationConfig.type === "both"
+              ? "Individual or Team"
+              : event.registrationConfig.type === "team"
+                ? "Team"
+                : "Individual"
+          }
+        />
       ) : (
         <ComingSoonEvent event={event} />
       )}

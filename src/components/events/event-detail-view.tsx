@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LocalImage } from "@/components/site/local-image";
 import { ArrowUpRight, CalendarDays, MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfidenceBadge } from "@/components/site/confidence-badge";
@@ -31,11 +32,14 @@ export function EventDetailView({
   event,
   registeredCount,
   interactive = true,
+  registrationType,
 }: {
   event: EventWithDetails;
   registeredCount: number;
   /** false in admin preview: no live registration CTA on unpublished content. */
   interactive?: boolean;
+  /** "Individual" / "Team" / "Individual or Team" — omitted when not applicable. */
+  registrationType?: string;
 }) {
   const registration = registrationState(event, registeredCount);
 
@@ -46,7 +50,14 @@ export function EventDetailView({
           <div className="relative aspect-[4/3] overflow-hidden border border-border">
             {event.poster_url ? (
               <div className="relative h-full w-full overflow-hidden">
-                <img src={event.poster_url} alt={event.title} className="h-full w-full object-cover" />
+                <LocalImage
+                  src={event.poster_url}
+                  alt={event.title}
+                  fill
+                  sizes="(min-width: 1024px) 560px, 100vw"
+                  preload
+                  className="object-cover"
+                />
                 <div className="pointer-events-none absolute inset-0 border border-black/80" />
               </div>
             ) : (
@@ -83,6 +94,7 @@ export function EventDetailView({
                 <Users className="size-4 text-primary" />
                 {registeredCount}
                 {event.capacity ? ` / ${event.capacity}` : ""} registered
+                {registrationType && ` · ${registrationType}`}
               </p>
             )}
           </div>
@@ -198,10 +210,12 @@ export function EventDetailView({
                   >
                     {item.image_url ? (
                       <div className="relative h-full w-full overflow-hidden">
-                        <img
+                        <LocalImage
                           src={item.image_url}
                           alt={item.caption ?? event.title}
-                          className="h-full w-full object-cover"
+                          fill
+                          sizes="(min-width: 640px) 200px, 33vw"
+                          className="object-cover"
                         />
                         <div className="pointer-events-none absolute inset-0 border border-black/80" />
                       </div>

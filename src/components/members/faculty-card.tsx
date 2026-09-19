@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LocalImage } from "@/components/site/local-image";
 import { initials } from "@/lib/format";
 import type { Member } from "@/types/database";
 
@@ -22,13 +23,15 @@ export function FacultyCard({ member }: { member: Member }) {
           <span className="size-1.5 rounded-full bg-zinc-500/60" />
         </div>
 
-        <div className="aspect-[3/4] w-full overflow-hidden bg-zinc-900">
+        <div className="relative aspect-[3/4] w-full overflow-hidden bg-zinc-900">
           {member.photo_url ? (
-            <img
+            <LocalImage
               src={member.photo_url}
               alt={member.name}
+              fill
+              sizes="(min-width: 640px) 240px, 45vw"
               style={{ objectPosition: member.photo_position ?? "center 20%" }}
-              className="size-full object-cover"
+              className="object-cover"
             />
           ) : (
             <div className="flex size-full items-center justify-center font-heading text-3xl font-semibold text-emerald-400">
