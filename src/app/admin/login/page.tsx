@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Loader2, ShieldCheck } from "lucide-react";
@@ -27,7 +28,10 @@ function AdminLoginForm() {
     const result = await signIn("credentials", { email, password, redirect: false });
 
     if (result?.error) {
-      setError("Invalid email or password.");
+      // Deliberately does not distinguish wrong password from a not-yet-approved
+      // account — that would confirm which emails are registered. The hint covers
+      // the pending case without naming it.
+      setError("Invalid email or password, or your account hasn't been approved yet.");
       setSubmitting(false);
       return;
     }
@@ -72,6 +76,13 @@ function AdminLoginForm() {
       <Button type="submit" className="w-full" size="lg" disabled={submitting}>
         {submitting ? <Loader2 className="size-4 animate-spin" /> : "Sign in"}
       </Button>
+
+      <p className="text-center text-sm text-muted-foreground">
+        Don&apos;t have an account?{" "}
+        <Link href="/admin/register" className="text-primary underline-offset-4 hover:underline">
+          Create account
+        </Link>
+      </p>
     </form>
   );
 }

@@ -41,7 +41,11 @@ export function AdminsTable({ admins, currentAdminId }: { admins: Admin[]; curre
           {admins.map((admin) => (
             <TableRow key={admin.id}>
               <TableCell className="font-medium text-foreground">
-                {admin.name} {admin.id === currentAdminId && <Badge variant="outline" className="ml-1.5 text-[10px]">You</Badge>}
+                {admin.name}
+                {admin.id === currentAdminId && <Badge variant="outline" className="ml-1.5 text-[10px]">You</Badge>}
+                {!admin.isActive && admin.lastLoginAt === null && (
+                  <Badge variant="secondary" className="ml-1.5 text-[10px]">Pending approval</Badge>
+                )}
               </TableCell>
               <TableCell className="text-muted-foreground">{admin.email}</TableCell>
               <TableCell>

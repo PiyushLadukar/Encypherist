@@ -6,12 +6,61 @@ import { revalidatePath } from "next/cache";
 import { getCollections } from "@/lib/mongodb";
 import { requireAdminApi, AdminAuthError } from "@/lib/admin-guard";
 import { logAdminAction } from "@/lib/audit";
-import { createAdminSchema, type CreateAdminInput } from "@/lib/validation/admin";
+import {
+  createAdminSchema,
+  registerAdminSchema,
+  type CreateAdminInput,
+  type RegisterAdminInput,
+} from "@/lib/validation/admin";
 import { findAdminByEmail } from "@/lib/data/admins";
 import type { ActionResult } from "./events";
 
 function fail(error: string): ActionResult<never> {
   return { ok: false, error };
+}
+
+/**
+ * Public self-signup from /admin/register. Unauthenticated by design, so it is
+ * locked down in two ways: the new account is always `isActive: false` (auth.ts
+ * refuses to issue a session for one) and always the lowest role. Nothing about
+ * the request can influence either. A super admin grants access from
+ * /admin/admins; role changes are made directly in the database.
+ */
+export async function requestAdminAccount(input: RegisterAdminInput): Promise<ActionResult> {
+  try {
+    const parsed = registerAdminSchema.safeParse(input);
+    if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Invalid details.");
+
+    const { admins } = await getCollections();
+    const passwordHash = await bcrypt.hash(parsed.data.password, 12);
+    const now = new Date();
+
+    // The unique index is what actually prevents duplicate accounts — a
+    // read-then-insert check would race between two concurrent signups. Signups
+    // are rare and createIndex is a no-op once it exists, so assert it here
+    // rather than relying on db:seed-admin having been run on this database.
+    await admins.createIndex({ email: 1 }, { unique: true });
+
+    await admins.insertOne({
+      name: parsed.data.name,
+      email: parsed.data.email,
+      passwordHash,
+      role: "admin",
+      isActive: false,
+      createdAt: now,
+      updatedAt: now,
+      lastLoginAt: null,
+    });
+
+    revalidatePath("/admin/admins");
+    return { ok: true, data: undefined };
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("E11000")) {
+      return fail("An account with this email already exists.");
+    }
+    console.error("requestAdminAccount failed", err);
+    return fail("Something went wrong creating your account.");
+  }
 }
 
 export async function createAdminAccount(input: CreateAdminInput): Promise<ActionResult<{ id: string }>> {
