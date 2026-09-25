@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getEventBySlugAdmin } from "@/lib/data/admin-events";
 import { isRegistrationOpen } from "@/lib/event-status";
 import { saveUploadedImage, UploadError } from "@/lib/uploads";
+import { hit, getClientIp, tooManyRequests } from "@/lib/rate-limit";
 
 /**
  * Public endpoint used by dynamic "file" fields during registration (e.g. an
@@ -11,6 +12,11 @@ import { saveUploadedImage, UploadError } from "@/lib/uploads";
  * + size cap, never trusting the browser-supplied name/type.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  // Unauthenticated and it writes files, so it is the most abusable endpoint on
+  // the site. Limit before doing any work, including reading the body.
+  const limited = hit(`upload:${getClientIp(request)}`, 10, 10 * 60 * 1000);
+  if (!limited.ok) return tooManyRequests(limited.retryAfterSeconds);
+
   const { slug } = await params;
   const event = await getEventBySlugAdmin(slug);
   if (!event || event.status !== "published") {

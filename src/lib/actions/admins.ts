@@ -3,6 +3,8 @@
 import { ObjectId } from "mongodb";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+import { hit, getClientIpFromHeaders } from "@/lib/rate-limit";
 import { getCollections } from "@/lib/mongodb";
 import { requireAdminApi, AdminAuthError } from "@/lib/admin-guard";
 import { logAdminAction } from "@/lib/audit";
@@ -28,8 +30,18 @@ function fail(error: string): ActionResult<never> {
  */
 export async function requestAdminAccount(input: RegisterAdminInput): Promise<ActionResult> {
   try {
+    const ip = getClientIpFromHeaders(await headers());
+    const limited = hit(`admin-signup:${ip}`, 5, 60 * 60 * 1000);
+    if (!limited.ok) {
+      return fail("Too many sign-up attempts. Try again later.");
+    }
+
     const parsed = registerAdminSchema.safeParse(input);
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Invalid details.");
+
+    // Honeypot: a field hidden from people but filled in by naive form bots.
+    // Answer as if it worked so the bot has nothing to tune against.
+    if (input.website) return { ok: true, data: undefined };
 
     const { admins } = await getCollections();
     const passwordHash = await bcrypt.hash(parsed.data.password, 12);

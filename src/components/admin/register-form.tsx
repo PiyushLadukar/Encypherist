@@ -16,6 +16,7 @@ export function AdminRegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [website, setWebsite] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
@@ -23,7 +24,7 @@ export function AdminRegisterForm() {
     e.preventDefault();
     setError(null);
 
-    const parsed = registerAdminSchema.safeParse({ name, email, password, confirmPassword });
+    const parsed = registerAdminSchema.safeParse({ name, email, password, confirmPassword, website });
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message ?? "Please check the form.");
       return;
@@ -110,6 +111,21 @@ export function AdminRegisterForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="mt-1.5"
+          />
+        </div>
+
+        {/* Honeypot. Hidden from people and skipped by screen readers and tab
+            order, so only a form-filling bot ever populates it. */}
+        <div aria-hidden className="pointer-events-none absolute -left-[9999px] size-0 overflow-hidden">
+          <label htmlFor="website">Website</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            value={website}
+            onChange={(e) => setWebsite(e.target.value)}
           />
         </div>
 

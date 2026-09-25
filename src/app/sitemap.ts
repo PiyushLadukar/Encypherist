@@ -12,11 +12,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getGalleryEvents().catch(() => []),
   ]);
 
+  // /certificates and /admin are deliberately absent — both are noindex.
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
     { url: `${SITE_URL}/member`, changeFrequency: "weekly", priority: 0.8 },
     { url: `${SITE_URL}/events`, changeFrequency: "weekly", priority: 0.9 },
     { url: `${SITE_URL}/gallery`, changeFrequency: "weekly", priority: 0.6 },
+    { url: `${SITE_URL}/projects`, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${SITE_URL}/about`, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const eventRoutes: MetadataRoute.Sitemap = events.map((event) => ({
