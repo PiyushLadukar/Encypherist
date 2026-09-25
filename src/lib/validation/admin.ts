@@ -24,6 +24,8 @@ export const registerAdminSchema = z
     email: z.string().trim().toLowerCase().email("Enter a valid email"),
     password: z.string().min(8, "Password must be at least 8 characters").max(200),
     confirmPassword: z.string(),
+    /** Honeypot — hidden from people, so anything here means a bot. */
+    website: z.string().max(200).optional(),
   })
   .refine((v) => v.password === v.confirmPassword, {
     path: ["confirmPassword"],

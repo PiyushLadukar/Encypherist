@@ -4,8 +4,14 @@ import { getEventBySlugAdmin } from "@/lib/data/admin-events";
 import { isRegistrationOpen } from "@/lib/event-status";
 import { buildRegistrationSchema, checkEligibility } from "@/lib/validation/registration";
 import { splitFields, deriveParticipant, hasIdentity } from "@/lib/registration-form";
+import { hit, getClientIp, tooManyRequests } from "@/lib/rate-limit";
 
 export async function POST(request: Request, { params }: { params: Promise<{ slug: string }> }) {
+  // Generous enough for a family sharing a connection or a lab full of students
+  // on one NAT, tight enough to stop a script filling the participant list.
+  const limited = hit(`register:${getClientIp(request)}`, 15, 10 * 60 * 1000);
+  if (!limited.ok) return tooManyRequests(limited.retryAfterSeconds);
+
   const { slug } = await params;
 
   const event = await getEventBySlugAdmin(slug);
