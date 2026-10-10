@@ -16,13 +16,15 @@ export default async function EventsPage() {
   const { upcoming, past, announced } = splitUpcomingPast(events);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <Reveal>
-        <SectionHeading
-          eyebrow="Everything, logged"
-          title="Workshops, hackathons, talks and the occasional donation drive."
-          description="Every event below traces back to a verified source — see docs/research.md for the trail."
-        />
+        <div className="glass-panel max-w-3xl rounded-3xl p-8 sm:p-10 mb-10">
+          <SectionHeading
+            eyebrow="Everything, logged"
+            title="Workshops, hackathons, talks and the occasional donation drive."
+            description="Every event below traces back to a verified source — see docs/research.md for the trail."
+          />
+        </div>
       </Reveal>
 
       {events.length === 0 ? (

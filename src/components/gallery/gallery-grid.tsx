@@ -99,7 +99,7 @@ function EventRow({
     >
       <Link
         href={`/gallery/${event.id}`}
-        className="relative flex w-full flex-col items-stretch overflow-hidden rounded-2xl border border-border/70 bg-card text-left shadow-[0_1px_10px_-4px_rgba(0,0,0,0.06)] transition-shadow duration-500 hover:shadow-[0_24px_48px_-24px_rgba(0,0,0,0.22)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:flex-row"
+        className="glass-card relative flex w-full flex-col items-stretch overflow-hidden rounded-2xl text-left shadow-[0_1px_10px_-4px_rgba(0,0,0,0.06)] transition-all duration-500 hover:shadow-[0_24px_48px_-24px_rgba(0,90,54,0.22)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:flex-row"
         aria-label={`Open ${event.title} photo gallery`}
       >
         <div className="relative aspect-[4/3] w-full overflow-hidden sm:aspect-auto sm:w-[54%]">

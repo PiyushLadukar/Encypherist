@@ -24,7 +24,7 @@ export function MemberIdCard({ member }: { member: Member }) {
   const status = memberStatus(member.team_group);
 
   return (
-    <div className="mx-auto w-full max-w-sm overflow-hidden rounded-[2rem] border-2 border-border bg-card shadow-xl">
+    <div className="mx-auto w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/75 bg-white/65 backdrop-blur-2xl shadow-2xl">
       {/* terminal-style title strip — matches MemberCard's IDE-window motif */}
       <div className="flex items-center justify-between gap-2 border-b border-border bg-black/5 px-4 py-2.5">
         <span className="flex items-center gap-1.5">

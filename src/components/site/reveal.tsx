@@ -15,17 +15,19 @@ export function Reveal({
   children,
   delay = 0,
   className,
+  yOffset = 40,
 }: {
   children: React.ReactNode;
   delay?: number;
   className?: string;
+  yOffset?: number;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 36, scale: 0.96, filter: "blur(8px)" }}
+      initial={{ opacity: 0, y: yOffset, scale: 0.96, filter: "blur(10px)" }}
       whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-      viewport={{ once: true, amount: 0, margin: "0px 0px -10% 0px" }}
-      transition={{ duration: 0.7, delay, ease: EASE_PREMIUM }}
+      viewport={{ once: true, amount: 0.15, margin: "0px 0px -5% 0px" }}
+      transition={{ duration: 0.8, delay, ease: EASE_PREMIUM }}
       className={className}
     >
       {children}
@@ -44,7 +46,7 @@ export function Stagger({
   children,
   className,
   delay = 0,
-  stagger = 0.09,
+  stagger = 0.12,
   once = true,
   as = "div",
 }: {
@@ -61,7 +63,7 @@ export function Stagger({
     <MotionTag
       initial="hidden"
       whileInView="show"
-      viewport={{ once, amount: 0, margin: "0px 0px -10% 0px" }}
+      viewport={{ once, amount: 0.1, margin: "0px 0px -5% 0px" }}
       variants={{
         hidden: {},
         show: {
@@ -92,13 +94,13 @@ export function StaggerItem({
   return (
     <MotionTag
       variants={{
-        hidden: { opacity: 0, y: 28, scale: 0.96, filter: "blur(6px)" },
+        hidden: { opacity: 0, y: 36, scale: 0.95, filter: "blur(8px)" },
         show: {
           opacity: 1,
           y: 0,
           scale: 1,
           filter: "blur(0px)",
-          transition: { duration: 0.55, ease: EASE_PREMIUM },
+          transition: { duration: 0.7, ease: EASE_PREMIUM },
         },
       }}
       className={className}

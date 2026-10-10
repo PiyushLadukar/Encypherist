@@ -65,10 +65,10 @@ export function MemberDirectory({ members }: { members: Member[] }) {
               type="button"
               onClick={() => setFilter(f.value)}
               className={cn(
-                "rounded-md border px-3.5 py-1.5 font-mono text-xs uppercase tracking-wider transition-all duration-300 bg-background",
+                "rounded-full border px-4 py-1.5 font-mono text-xs uppercase tracking-wider transition-all duration-300 backdrop-blur-md shadow-sm",
                 filter === f.value
-                  ? "border-emerald-400 text-emerald-400 shadow-[0_0_12px_-2px_rgba(52,211,153,0.3)] font-semibold"
-                  : "border-border/60 text-muted-foreground hover:border-zinc-700 hover:text-foreground"
+                  ? "border-emerald-500 bg-emerald-500/10 text-emerald-600 shadow-[0_0_12px_-2px_rgba(52,211,153,0.3)] font-semibold"
+                  : "border-white/80 bg-white/70 text-muted-foreground hover:border-zinc-300 hover:text-foreground hover:bg-white/90"
               )}
             >
               {f.label}
@@ -81,7 +81,7 @@ export function MemberDirectory({ members }: { members: Member[] }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search members..."
-            className="pl-9"
+            className="pl-9 bg-white/70 backdrop-blur-md border-white/80 shadow-sm"
             aria-label="Search members"
           />
         </div>

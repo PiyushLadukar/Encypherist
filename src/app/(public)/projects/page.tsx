@@ -15,13 +15,15 @@ export default async function ProjectsPage() {
   const projects = await getPublishedProjects().catch(() => []);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <Reveal>
-        <SectionHeading
-          eyebrow="// BUILD_LOG"
-          title="What we've shipped."
-          description="A collection of real-world projects built by the Encypherist community. Focused on learning, building and deploying — not just simulating."
-        />
+        <div className="glass-panel max-w-3xl rounded-3xl p-8 sm:p-10 mb-10">
+          <SectionHeading
+            eyebrow="// BUILD_LOG"
+            title="What we've shipped."
+            description="A collection of real-world projects built by the Encypherist community. Focused on learning, building and deploying — not just simulating."
+          />
+        </div>
       </Reveal>
 
       {projects.length === 0 ? (

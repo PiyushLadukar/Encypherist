@@ -73,12 +73,12 @@ export function MemberCard({ member, className }: { member: Member; className?: 
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-[2rem] border border-zinc-800/80 bg-background transition-all duration-500 ease-out hover:-translate-y-1 hover:border-emerald-400/40 hover:shadow-[0_0_40px_-12px_rgba(52,211,153,0.35)]",
+        "group relative flex flex-col overflow-hidden rounded-[2rem] border border-white/60 bg-white/65 backdrop-blur-xl shadow-lg transition-all duration-500 ease-out hover:-translate-y-1 hover:border-emerald-400/60 hover:shadow-[0_20px_50px_-10px_rgba(0,90,54,0.25)]",
         className
       )}
     >
       {/* terminal-style title strip — our take on an IDE window bar */}
-      <div className="flex items-center justify-between gap-2 border-b border-zinc-800/80 bg-black/5 px-3 py-2">
+      <div className="flex items-center justify-between gap-2 border-b border-border/40 bg-black/5 px-3 py-2 backdrop-blur-sm">
         <span className="flex items-center gap-1.5">
           <span className="size-1.5 rounded-full bg-signal/70" />
           <span className="size-1.5 rounded-full bg-emerald-400/70" />

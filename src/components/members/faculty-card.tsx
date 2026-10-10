@@ -11,13 +11,13 @@ import type { Member } from "@/types/database";
  */
 export function FacultyCard({ member }: { member: Member }) {
   return (
-    <Link href={`/member/${member.slug}`} className="relative mx-auto block w-full max-w-[220px] pt-3.5">
-      <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-border bg-card px-2.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-primary shadow-sm">
+    <Link href={`/member/${member.slug}`} className="relative mx-auto block w-full max-w-[220px] pt-3.5 group">
+      <span className="absolute left-1/2 top-0 z-10 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full border border-white/80 bg-white/80 backdrop-blur-md px-2.5 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-wider text-primary shadow-sm">
         {member.designation}
       </span>
 
-      <div className="overflow-hidden rounded-xl border border-border bg-background shadow-sm">
-        <div className="flex items-center gap-1.5 border-b border-border bg-black/5 px-2.5 py-1.5">
+      <div className="overflow-hidden rounded-xl border border-white/60 bg-white/60 backdrop-blur-xl shadow-md transition-all duration-300 group-hover:-translate-y-1 group-hover:border-emerald-500/40 group-hover:shadow-[0_12px_30px_rgba(0,90,54,0.15)]">
+        <div className="flex items-center gap-1.5 border-b border-border/40 bg-black/5 px-2.5 py-1.5">
           <span className="size-1.5 rounded-full bg-signal/70" />
           <span className="size-1.5 rounded-full bg-emerald-400/70" />
           <span className="size-1.5 rounded-full bg-zinc-500/60" />

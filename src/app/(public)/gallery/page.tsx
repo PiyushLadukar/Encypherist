@@ -23,7 +23,7 @@ export default async function GalleryPage() {
     <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <GalleryBackground />
 
-      <div className="corner-brackets relative overflow-hidden pb-8">
+      <div className="canvas-frame relative overflow-hidden p-8 sm:p-10 mb-10">
         <HeroLineArt />
 
         <SectionHeading
@@ -38,7 +38,7 @@ export default async function GalleryPage() {
         />
         <span className="mt-6 block h-px w-10 bg-border" />
 
-        <p className="pointer-events-none absolute bottom-0 right-0 hidden items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60 sm:flex">
+        <p className="pointer-events-none absolute bottom-4 right-6 hidden items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground/60 sm:flex">
           <LocatorGlyph className="size-3 text-muted-foreground/50" />
           N 21.1458&deg; E 79.0882&deg;
         </p>
