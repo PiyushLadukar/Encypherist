@@ -68,7 +68,7 @@ export function EventDetailView({
 
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-border bg-card px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            <span className="rounded-full border border-black/20 bg-white/80 backdrop-blur-md px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wider text-muted-foreground shadow-sm">
               {eventTypeLabel(event.type)}
             </span>
             <ConfidenceBadge confidence={event.confidence} />
@@ -100,7 +100,7 @@ export function EventDetailView({
           </div>
 
           {event.start_at && !isPast(event.start_at) && (
-            <div className="mt-6 border border-dashed border-border p-4">
+            <div className="mt-6 rounded-xl border border-black/15 bg-white/60 backdrop-blur-md p-4 shadow-sm">
               <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                 T-MINUS
               </p>
@@ -123,7 +123,7 @@ export function EventDetailView({
               </Button>
             ) : (
               event.registration_enabled && (
-                <p className="rounded-md border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+                <p className="rounded-xl border border-white/60 bg-white/70 backdrop-blur-md px-4 py-3 text-sm text-muted-foreground">
                   {registration.reason}
                 </p>
               )
@@ -132,8 +132,8 @@ export function EventDetailView({
         </div>
       </div>
 
-      <div className="mt-16 grid gap-14 lg:grid-cols-[1.4fr_0.6fr]">
-        <div className="space-y-12">
+      <div className="grid gap-10 lg:grid-cols-[1.4fr_0.6fr]">
+        <div className="glass-section p-6 sm:p-10 space-y-12">
           {event.description && (
             <section>
               <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -150,10 +150,10 @@ export function EventDetailView({
               <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                 Schedule
               </h2>
-              <ol className="mt-4 space-y-4 border-l border-border pl-5">
+              <ol className="mt-4 space-y-4 border-l border-primary/30 pl-5">
                 {event.schedule.map((item, i) => (
                   <li key={i}>
-                    {item.time && <p className="font-mono text-xs text-primary">{item.time}</p>}
+                    {item.time && <p className="font-mono text-xs text-primary font-semibold">{item.time}</p>}
                     <p className="font-heading text-base font-semibold text-foreground">
                       {item.title}
                     </p>
@@ -182,7 +182,7 @@ export function EventDetailView({
               <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
                 FAQ
               </h2>
-              <div className="mt-4 divide-y divide-border border-y border-border">
+              <div className="mt-4 divide-y divide-border/60 border-y border-border/60">
                 {event.faqs.map((faq) => (
                   <details key={faq.id} className="group py-4">
                     <summary className="cursor-pointer list-none font-heading text-base font-medium text-foreground marker:content-none">
@@ -206,7 +206,7 @@ export function EventDetailView({
                 {event.gallery.map((item) => (
                   <div
                     key={item.id}
-                    className="aspect-square overflow-hidden rounded-md border border-border"
+                    className="aspect-square overflow-hidden rounded-xl border border-white/60 shadow-sm"
                   >
                     {item.image_url ? (
                       <div className="relative h-full w-full overflow-hidden">
@@ -229,7 +229,7 @@ export function EventDetailView({
           )}
         </div>
 
-        <aside className="space-y-10">
+        <aside className="glass-section p-6 sm:p-8 space-y-10 h-fit">
           {event.eligibility && (
             <div>
               <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">

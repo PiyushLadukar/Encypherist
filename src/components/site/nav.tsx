@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Calendar, Home, Images, Info, Users } from "lucide-react";
 import { Logo } from "@/components/site/logo";
 import { MobileNav } from "@/components/site/mobile-nav";
-import { NAV_LINKS } from "@/lib/constants";
+import { MenuBar } from "@/components/ui/animated-menu-bar";
 import { cn } from "@/lib/utils";
 
 export function Nav({
@@ -26,10 +27,10 @@ export function Nav({
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 w-full border-b transition-colors duration-300 max-lg:pt-[env(safe-area-inset-top)]",
+        "sticky top-0 z-50 w-full border-b transition-all duration-300 max-lg:pt-[env(safe-area-inset-top)]",
         scrolled
-          ? "border-border bg-background/90 backdrop-blur-md"
-          : "border-transparent bg-transparent"
+          ? "border-black/20 bg-white/85 backdrop-blur-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.08)]"
+          : "border-black/15 bg-white/60 backdrop-blur-md"
       )}
     >
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -37,26 +38,49 @@ export function Nav({
           <Logo />
         </Link>
 
-        <div className="hidden items-center gap-1 lg:flex">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "rounded-md px-3 py-2 font-mono text-xs uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground",
-                pathname === link.href && "text-foreground"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+        <div className="hidden items-center lg:flex">
+          <MenuBar
+            active={pathname}
+            items={[
+              {
+                key: "home",
+                label: "Home",
+                href: "/",
+                icon: <Home className="h-4 w-4" />,
+              },
+              {
+                key: "member",
+                label: "Members",
+                href: "/member",
+                icon: <Users className="h-4 w-4" />,
+              },
+              {
+                key: "events",
+                label: "Events",
+                href: "/events",
+                icon: <Calendar className="h-4 w-4" />,
+              },
+              {
+                key: "gallery",
+                label: "Gallery",
+                href: "/gallery",
+                icon: <Images className="h-4 w-4" />,
+              },
+              {
+                key: "about",
+                label: "About",
+                href: "/about",
+                icon: <Info className="h-4 w-4" />,
+              },
+            ]}
+          />
         </div>
 
         <div className="hidden items-center gap-4 md:flex">
           {featuredEvent && (
             <Link
               href={`/events/${featuredEvent.slug}`}
-              className="hidden max-w-[180px] truncate font-mono text-xs text-muted-foreground transition-colors hover:text-primary lg:inline-block"
+              className="hidden max-w-[180px] truncate rounded-full border border-border/80 bg-white/60 px-3 py-1 font-mono text-xs text-muted-foreground backdrop-blur-md transition-colors hover:border-emerald-400/60 hover:text-primary lg:inline-block"
             >
               → {featuredEvent.title}
             </Link>
@@ -68,3 +92,5 @@ export function Nav({
     </header>
   );
 }
+
+

@@ -39,7 +39,7 @@ export default async function EventRegisterPage({
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-20 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-lg px-4 py-12 sm:px-6 lg:px-8">
       <Link
         href={`/events/${event.slug}`}
         className="inline-flex items-center gap-1.5 font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
@@ -48,13 +48,15 @@ export default async function EventRegisterPage({
         Back to event
       </Link>
 
-      <p className="mt-8 font-mono text-xs uppercase tracking-[0.2em] text-primary">Register</p>
-      <h1 className="mt-2 text-balance font-heading text-3xl font-semibold tracking-tight text-foreground">
-        {event.title}
-      </h1>
-      <p className="mt-1 font-mono text-sm text-muted-foreground">
-        {formatDateRange(event.start_at, event.end_at)}
-      </p>
+      <div className="mt-6 glass-morphism p-6 sm:p-8">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-primary font-semibold">Register</p>
+        <h1 className="mt-2 text-balance font-heading text-3xl font-semibold tracking-tight text-foreground">
+          {event.title}
+        </h1>
+        <p className="mt-1 font-mono text-sm text-muted-foreground">
+          {formatDateRange(event.start_at, event.end_at)}
+        </p>
+      </div>
 
       <div className="mt-10">
         {closedReason ? (

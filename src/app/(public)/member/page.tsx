@@ -16,13 +16,15 @@ export default async function MembersPage() {
   const members = await getPublishedMembers().catch(() => []);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
       <Reveal>
-        <SectionHeading
-          eyebrow="The roster"
-          title="Meet the people behind the community."
-          description="Every tenure, a new council keeps Encypherist running — technical, creative, strategic and everything in between."
-        />
+        <div className="glass-panel max-w-3xl rounded-3xl p-8 sm:p-10 mb-10">
+          <SectionHeading
+            eyebrow="The roster"
+            title="Meet the people behind the community."
+            description="Every tenure, a new council keeps Encypherist running — technical, creative, strategic and everything in between."
+          />
+        </div>
       </Reveal>
 
       {members.length === 0 ? (

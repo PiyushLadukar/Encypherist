@@ -64,7 +64,7 @@ function EventDirectoryContent({
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-border pb-6">
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-border/60 pb-6">
         {tabs.map((t) => (
           <button
             key={t.value}
@@ -74,10 +74,10 @@ function EventDirectoryContent({
               setTypeFilter("all");
             }}
             className={cn(
-              "rounded-full border px-4 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors",
+              "rounded-full border px-4 py-1.5 font-mono text-xs uppercase tracking-wider transition-all backdrop-blur-md shadow-sm",
               tab === t.value
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-border text-muted-foreground hover:text-foreground"
+                ? "border-emerald-500 bg-emerald-500/10 text-emerald-600 font-semibold shadow-[0_0_12px_-2px_rgba(52,211,153,0.3)]"
+                : "border-white/80 bg-white/70 text-muted-foreground hover:text-foreground hover:bg-white/90"
             )}
           >
             {t.label} ({t.count})

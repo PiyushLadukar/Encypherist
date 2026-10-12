@@ -57,53 +57,55 @@ export default async function ProjectDetailPage({
         </Link>
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="relative aspect-[21/9] overflow-hidden border border-border">
-          <PosterPlaceholder title={project.name} />
-        </div>
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8 space-y-10">
+        <div className="glass-morphism p-6 sm:p-10">
+          <div className="relative aspect-[21/9] overflow-hidden rounded-xl border border-white/60 shadow-md">
+            <PosterPlaceholder title={project.name} />
+          </div>
 
-        <div className="mt-8 flex flex-wrap items-center gap-2">
-          <span className="font-mono text-xs text-primary">
-            {`// ${projectNumber(index >= 0 ? index : 0)}`}
-          </span>
-          <span className="rounded-full border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-            STATUS: {projectStatusLabel(project.status)}
-          </span>
-          <ConfidenceBadge confidence={project.confidence} />
-        </div>
+          <div className="mt-8 flex flex-wrap items-center gap-2">
+            <span className="font-mono text-xs text-primary font-semibold">
+              {`// ${projectNumber(index >= 0 ? index : 0)}`}
+            </span>
+            <span className="rounded-full border border-white/80 bg-white/80 px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground shadow-sm">
+              STATUS: {projectStatusLabel(project.status)}
+            </span>
+            <ConfidenceBadge confidence={project.confidence} />
+          </div>
 
-        <h1 className="mt-3 text-balance font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-          {project.name}
-        </h1>
+          <h1 className="mt-4 text-balance font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+            {project.name}
+          </h1>
 
-        {project.summary && (
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            {project.summary}
-          </p>
-        )}
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          {project.link_url && (
-            <Button nativeButton={false} render={<a href={project.link_url} target="_blank" rel="noopener noreferrer" />} className="font-mono text-sm">
-              Live link
-              <ArrowUpRight className="size-4" />
-            </Button>
+          {project.summary && (
+            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">
+              {project.summary}
+            </p>
           )}
-          {project.repo_url && (
-            <Button
-              variant="outline"
-              nativeButton={false}
-              render={<a href={project.repo_url} target="_blank" rel="noopener noreferrer" />}
-              className="font-mono text-sm"
-            >
-              <Code2 className="size-4" />
-              Repository
-            </Button>
-          )}
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            {project.link_url && (
+              <Button nativeButton={false} render={<a href={project.link_url} target="_blank" rel="noopener noreferrer" />} className="font-mono text-sm">
+                Live link
+                <ArrowUpRight className="size-4" />
+              </Button>
+            )}
+            {project.repo_url && (
+              <Button
+                variant="outline"
+                nativeButton={false}
+                render={<a href={project.repo_url} target="_blank" rel="noopener noreferrer" />}
+                className="font-mono text-sm"
+              >
+                <Code2 className="size-4" />
+                Repository
+              </Button>
+            )}
+          </div>
         </div>
 
-        <div className="mt-16 grid gap-14 lg:grid-cols-[1.4fr_0.6fr]">
-          <div className="space-y-12">
+        <div className="grid gap-10 lg:grid-cols-[1.4fr_0.6fr]">
+          <div className="glass-section p-6 sm:p-10 space-y-12">
             {project.problem && (
               <section>
                 <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -126,7 +128,7 @@ export default async function ProjectDetailPage({
             )}
           </div>
 
-          <aside className="space-y-10">
+          <aside className="glass-section p-6 sm:p-8 space-y-10 h-fit">
             {project.tech_stack.length > 0 && (
               <div>
                 <h2 className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
@@ -136,7 +138,7 @@ export default async function ProjectDetailPage({
                   {project.tech_stack.map((tech) => (
                     <span
                       key={tech}
-                      className="rounded-full border border-border px-2.5 py-1 font-mono text-[11px] text-foreground/80"
+                      className="rounded-full border border-white/80 bg-white/80 px-2.5 py-1 font-mono text-[11px] text-foreground shadow-sm"
                     >
                       {tech}
                     </span>
@@ -155,7 +157,7 @@ export default async function ProjectDetailPage({
                       <li key={name}>
                         <Link
                           href={`/member/${member.slug}`}
-                          className="text-sm text-foreground/80 underline-offset-4 transition-colors hover:text-primary hover:underline"
+                          className="text-sm font-medium text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
                         >
                           {name}
                         </Link>

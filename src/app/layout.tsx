@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { TopographyBackground } from "@/components/site/topography-background";
+import { SmoothCursor } from "@/components/site/smooth-cursor";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -53,8 +55,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${spaceGrotesk.variable} ${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
-        {children}
+      <body className="relative min-h-full flex flex-col bg-background text-foreground font-sans">
+        <SmoothCursor />
+        <TopographyBackground />
+        <div className="relative z-10 flex flex-col min-h-full flex-1">
+          {children}
+        </div>
         <Toaster />
       </body>
     </html>
